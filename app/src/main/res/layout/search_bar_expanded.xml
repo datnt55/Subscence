@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/search_box_expanded"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:visibility="gone">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/search_back_button"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_margin="14dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_arrow_back_black_24dp"
+            android:background="@null"
+            android:tint="#7b7b7b"/>
+
+        <EditText
+            android:id="@+id/search_view"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="15dp"
+            android:layout_weight="1"
+            android:background="@null"
+            android:fontFamily="sans-serif"
+            android:imeOptions="flagNoExtractUi"
+            android:inputType="textFilter"
+            android:labelFor="@+id/search_view"
+            android:maxLines="1"
+            android:textColor="#212121"
+            android:textColorHint="#7b7b7b"
+            android:textSize="20sp"/>
+
+        <ImageView
+            android:id="@+id/search_close_button"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:clickable="true"
+            android:contentDescription="Search"
+            android:padding="16dp"
+            android:src="@drawable/ic_close_black_24dp"
+            android:tint="#7b7b7b"/>
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:layout_gravity="bottom"
+        android:background="@drawable/ab_gradient" />
+</FrameLayout>

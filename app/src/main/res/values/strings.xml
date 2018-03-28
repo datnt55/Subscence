@@ -1,0 +1,15 @@
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name">SubScene</string>
+    <string name="film_year"><![CDATA[<b>Year: </b> %1$s]]></string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <plurals name="tab_title_with_unread_items">
+        <item quantity="one">
+            <xliff:g id="title">%1$s</xliff:g>. <xliff:g id="count">%2$d</xliff:g> unread item.
+        </item>
+        <item quantity="other">
+            <xliff:g id="title">%1$s</xliff:g>. <xliff:g id="count">%2$d</xliff:g> unread items.
+        </item>
+    </plurals>
+</resources>

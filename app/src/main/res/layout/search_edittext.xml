@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_search_box"
+    android:layout_width="match_parent"
+    android:layout_height="64dp">
+
+    <subscene.datnt.com.subscene.SearchEditTextLayout
+        android:id="@+id/search_view_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/rounded_corner"
+        android:elevation="5dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/search_box_collapsed"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingEnd="0dp"
+            android:paddingStart="8dp"
+            android:visibility="visible">
+
+            <ImageButton
+                android:id="@+id/dialtacts_options_menu_button"
+                android:layout_width="36dp"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:paddingEnd="8dp"
+                android:paddingStart="0dp"
+                android:scaleType="center"
+                android:src="@drawable/ic_dehaze_black_24dp"
+                android:tint="#7b7b7b" />
+
+            <TextView
+                android:id="@+id/search_box_start_search"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif"
+                android:gravity="center_vertical"
+                android:hint="Search subtitle ..."
+                android:textColorHint="#7b7b7b"
+                android:textIsSelectable="true"
+                android:textSize="14sp" />
+
+
+        </LinearLayout>
+
+        <include layout="@layout/search_bar_expanded" />
+    </subscene.datnt.com.subscene.SearchEditTextLayout>
+</FrameLayout>

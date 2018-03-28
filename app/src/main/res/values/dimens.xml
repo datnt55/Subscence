@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Height of the selection indicator of a tab. -->
+    <dimen name="tab_selected_underline_height">2dp</dimen>
+    <dimen name="tab_text_size">14sp</dimen>
+</resources>
