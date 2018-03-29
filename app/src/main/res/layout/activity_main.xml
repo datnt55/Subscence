@@ -27,7 +27,7 @@
         android:id="@+id/lists_pager"
         android:layout_below="@+id/tabs"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         android:layout_weight="1" />
 
     <FrameLayout

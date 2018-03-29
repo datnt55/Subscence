@@ -7,12 +7,16 @@ import java.io.Serializable;
  */
 
 public class Film implements Serializable{
-    private String name;
-    private String url;
-    private String subCount;
-    private String type;
+    protected String name;
+    protected String url;
+    protected String subCount;
+    protected String type;
 
     public Film() {
+    }
+    public Film(String name, String url) {
+        this.name = name;
+        this.url = url;
     }
 
     public Film(String name, String url, String subCount) {

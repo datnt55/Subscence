@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity{
 
 
         adapter.addFrag(popular, "Popular Subtitle");
-        adapter.addFrag(new android.support.v4.app.Fragment(), "TV Subtitle");
+        adapter.addFrag(new AutoDownloadFragment(), "Auto Download");
         viewPager.setAdapter(adapter);
     }
     private void setupTabIcons() {

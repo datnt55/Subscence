@@ -342,7 +342,7 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
             if (result != null)
                 Toast.makeText(mThis,"Download error: "+result, Toast.LENGTH_LONG).show();
             else
-                Toast.makeText(mThis,"File downloaded", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mThis,"LocalFile downloaded", Toast.LENGTH_SHORT).show();
         }
 
     }
