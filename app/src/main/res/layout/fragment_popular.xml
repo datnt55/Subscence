@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="subscene.datnt.com.subscene.PopularFragment">
+    tools:context="subscene.datnt.com.subscene.activity.PopularFragment">
 
 
     <android.support.v7.widget.RecyclerView

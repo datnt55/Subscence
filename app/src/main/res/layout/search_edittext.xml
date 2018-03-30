@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="64dp">
 
-    <subscene.datnt.com.subscene.SearchEditTextLayout
+    <subscene.datnt.com.subscene.widget.SearchEditTextLayout
         android:id="@+id/search_view_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -55,5 +55,5 @@
         </LinearLayout>
 
         <include layout="@layout/search_bar_expanded" />
-    </subscene.datnt.com.subscene.SearchEditTextLayout>
+    </subscene.datnt.com.subscene.widget.SearchEditTextLayout>
 </FrameLayout>

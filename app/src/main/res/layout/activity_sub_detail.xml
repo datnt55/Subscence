@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:id="@+id/root"
-    tools:context="subscene.datnt.com.subscene.SubDetailActivity">
+    tools:context="subscene.datnt.com.subscene.activity.SubDetailActivity">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"

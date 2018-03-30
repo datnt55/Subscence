@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginTop="64dp"
-    tools:context="subscene.datnt.com.subscene.MainActivity">
+    tools:context="subscene.datnt.com.subscene.activity.MainActivity">
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list_film"
         android:layout_below="@+id/layout_search_box"
