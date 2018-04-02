@@ -24,6 +24,9 @@
         <activity android:name=".activity.SubDetailActivity" />
         <activity android:name=".activity.SubtitleDownloadActivity" />
         <activity android:name=".activity.ListSubtitleActivity"></activity>
+        <activity
+            android:theme="@style/Dialog_Theme"
+            android:name=".activity.FilePickerActivity"></activity>
     </application>
 
 </manifest>

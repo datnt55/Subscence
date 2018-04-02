@@ -14,16 +14,17 @@ import java.util.ArrayList;
 import subscene.datnt.com.subscene.activity.SearchFragment;
 import subscene.datnt.com.subscene.adapter.FilmAdapter;
 import subscene.datnt.com.subscene.model.Film;
+import subscene.datnt.com.subscene.utils.Globals;
 
 /**
  * Created by DatNT on 3/30/2018.
  */
 
 public class SeachFilmAsynTask extends AsyncTask<String, Void, ArrayList<Film>> implements SeachSubAsynTask.OnSearchSubListener {
-    private String query;
+    private String language;
     private OnSearchFilmListener listener;
-    public SeachFilmAsynTask(String query, OnSearchFilmListener listener) {
-        this.query = query;
+    public SeachFilmAsynTask(String language, OnSearchFilmListener listener) {
+        this.language = language;
         this.listener = listener;
     }
 
@@ -73,7 +74,7 @@ public class SeachFilmAsynTask extends AsyncTask<String, Void, ArrayList<Film>> 
         if (films.size() == 0) {
             listener.onSearchNoResult();
         } else {
-            new SeachSubAsynTask(this).execute(films.get(0).getUrl());
+            new SeachSubAsynTask(this).execute(films.get(0).getUrl()+"/"+language);
         }
 
     }

@@ -15,6 +15,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 
 import subscene.datnt.com.subscene.R;
@@ -22,12 +23,13 @@ import subscene.datnt.com.subscene.activity.SubDetailActivity;
 import subscene.datnt.com.subscene.adapter.SubtitleAdapter;
 import subscene.datnt.com.subscene.model.Film;
 import subscene.datnt.com.subscene.model.Subtitle;
+import subscene.datnt.com.subscene.utils.Globals;
 
 /**
  * Created by DatNT on 3/30/2018.
  */
 
-public class SeachSubAsynTask extends AsyncTask<String, Void, String> {
+public class SeachSubAsynTask extends AsyncTask<String, Void, String> implements DownloadSubAsynTask.OnDownloadSubtitleListener {
     private OnSearchSubListener listener;
 
     public SeachSubAsynTask(OnSearchSubListener listener) {
@@ -83,8 +85,13 @@ public class SeachSubAsynTask extends AsyncTask<String, Void, String> {
     @Override
     protected void onPostExecute(String subtitles) {
         super.onPostExecute(subtitles);
+        new DownloadSubAsynTask(this).execute(Globals.URL + subtitles);
+    }
+
+    @Override
+    public void onGetLinkSuccess(String link) {
         if (listener != null)
-            listener.onSearchSubtitleSuccess(subtitles);
+            listener.onSearchSubtitleSuccess(link);
     }
 
     public interface OnSearchSubListener{

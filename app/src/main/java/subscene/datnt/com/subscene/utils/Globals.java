@@ -196,4 +196,5 @@ public class Globals {
 
     public static final int CAMERA_STATE_PERMISSION = 26;
     public static final String EXTRA_IMAGE = "image";
+    public static final String URL = "https://subscene.com/";
 }

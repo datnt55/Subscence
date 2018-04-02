@@ -3,7 +3,10 @@ package subscene.datnt.com.subscene.activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -13,11 +16,14 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 import subscene.datnt.com.subscene.utils.Globals;
 import subscene.datnt.com.subscene.R;
+import subscene.datnt.com.subscene.widget.CoordinatorLayoutBottomSheetBehavior;
+import subscene.datnt.com.subscene.widget.FilePickerBottomSheet;
 import subscene.datnt.com.subscene.widget.SearchEditTextLayout;
 import subscene.datnt.com.subscene.adapter.ViewPagerAdapter;
 import subscene.datnt.com.subscene.utils.CommonUtils;
@@ -41,7 +47,9 @@ public class MainActivity extends AppCompatActivity{
             R.drawable.download,
             R.drawable.download
     };
-
+    private PopularFragment popularFragment;
+    private AutoDownloadFragment autoDownloadFragment;
+    private RelativeLayout layoutShadow;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,17 +60,33 @@ public class MainActivity extends AppCompatActivity{
         layoutSearch = findViewById(R.id.layout_search);
        // listFilm = findViewById(R.id.list_film);
         // Set layout manager
+        layoutShadow = findViewById(R.id.shadow);
         int orientation = getLayoutManagerOrientation(getResources().getConfiguration().orientation);
         final LinearLayoutManager layoutManager = new LinearLayoutManager(this, orientation, false);
-       // listFilm.setLayoutManager(layoutManager);
-       // adapter = new FilmHeadersAdapter(arrayFilms, mThis);
-      //  listFilm.setAdapter(adapter);
-      //  final StickyRecyclerHeadersDecoration headersDecor = new StickyRecyclerHeadersDecoration(adapter);
-      //  listFilm.addItemDecoration(headersDecor);
-     //   adapter.setOnItemClickListener(MainActivity.this);
-     //   new LoadData().execute(url);
         initSearchLayout();
         initViewPager();
+        final FilePickerBottomSheet mBottomSheet = findViewById(R.id.file_picker_bottom_sheet);
+
+        BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(mBottomSheet);
+        bottomSheetBehavior.setHideable(true);
+        //bottomSheetBehavior.setPeekHeight(126);
+        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED)
+                    layoutShadow.setVisibility(View.VISIBLE);
+                else if (newState == BottomSheetBehavior.STATE_HIDDEN)
+                    layoutShadow.setVisibility(View.GONE);
+                else if (newState == BottomSheetBehavior.STATE_EXPANDED)
+                    layoutShadow.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                layoutShadow.setVisibility(View.VISIBLE);
+                layoutShadow.setAlpha(slideOffset);
+            }
+        });
     }
 
     private void initViewPager() {
@@ -76,11 +100,11 @@ public class MainActivity extends AppCompatActivity{
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        android.support.v4.app.Fragment popular = new PopularFragment();
+        popularFragment = new PopularFragment();
+        autoDownloadFragment = new AutoDownloadFragment();
 
-
-        adapter.addFrag(popular, "Popular Subtitle");
-        adapter.addFrag(new AutoDownloadFragment(), "Auto Download");
+        adapter.addFrag(popularFragment, "Popular Subtitle");
+        adapter.addFrag(autoDownloadFragment, "Auto Download");
         viewPager.setAdapter(adapter);
     }
     private void setupTabIcons() {
@@ -192,11 +216,19 @@ public class MainActivity extends AppCompatActivity{
     private void hideComponentWhenSearchViewShow() {
         layoutSearch.animate().alpha(0).withLayer();
         tabLayout.animate().alpha(0).withLayer();
+        if (popularFragment.isVisible() && popularFragment.getView() != null && popularFragment.getView().animate() != null)
+            popularFragment.getView().animate().alpha(0).withLayer();
+        if (autoDownloadFragment.isVisible() && autoDownloadFragment.getView() != null && autoDownloadFragment.getView().animate() != null)
+            autoDownloadFragment.getView().animate().alpha(0).withLayer();
     }
 
     private void showComponentWhenSearchViewHide() {
         layoutSearch.animate().alpha(1).withLayer();
         tabLayout.animate().alpha(1).withLayer();
+        if (popularFragment.isVisible() && popularFragment.getView() != null && popularFragment.getView().animate() != null)
+            popularFragment.getView().animate().alpha(1).withLayer();
+        if (autoDownloadFragment.isVisible() && autoDownloadFragment.getView() != null && autoDownloadFragment.getView().animate() != null)
+            autoDownloadFragment.getView().animate().alpha(1).withLayer();
     }
 
     private int getLayoutManagerOrientation(int activityOrientation) {

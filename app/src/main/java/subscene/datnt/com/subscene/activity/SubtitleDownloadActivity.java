@@ -3,9 +3,11 @@ package subscene.datnt.com.subscene.activity;
 import android.animation.ValueAnimator;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Environment;
 import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -30,6 +32,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +46,8 @@ import subscene.datnt.com.subscene.model.Film;
 import subscene.datnt.com.subscene.R;
 import subscene.datnt.com.subscene.model.Subtitle;
 import subscene.datnt.com.subscene.model.SubtitleDetail;
+import subscene.datnt.com.subscene.utils.Decompress;
+import subscene.datnt.com.subscene.utils.FileUtil;
 
 public class SubtitleDownloadActivity extends AppCompatActivity {
     private Subtitle subtitle;
@@ -57,6 +62,8 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
     private String linkDownload;
     private int currentHeight = 0;
     private CardView cardView;
+    public final static int SELECT_PICTURE = 100;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -229,6 +236,7 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
 
     public class DownloadFileFromURL extends AsyncTask<String, Integer, String> {
         private ProgressDialog dialog;
+        private String fileName = "";
         private PowerManager.WakeLock mWakeLock;
         public DownloadFileFromURL() {
             dialog = new ProgressDialog(mThis);
@@ -265,8 +273,14 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
                 URL url = new URL(f_url[0]);
                 connection = (HttpURLConnection) url.openConnection();
                 connection.connect();
-                String a = FilenameUtils.getExtension(url.getPath());
-                String b = FilenameUtils.getBaseName(url.getPath());
+                long length = Long.parseLong(connection.getHeaderField("Content-Length"));
+                String type = connection.getHeaderField("Content-Type");
+                String content = connection.getHeaderField("Content-Disposition");
+                if ( content != null && content.indexOf ( "=" ) != -1 )
+                {
+                    fileName = content.split ( "=" )[1]; // getting value after '='
+                    fileName = fileName.replaceAll ( "\"", "" ).replaceAll ( "]", "" );
+                }
                 // expect HTTP 200 OK, so we don't mistakenly save error report
                 // instead of the file
                 if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
@@ -280,7 +294,7 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
 
                 // download the file
                 input = connection.getInputStream();
-                output = new FileOutputStream("/sdcard/file_name.rar");
+                output = new FileOutputStream("/sdcard/"+fileName);
 
                 byte data[] = new byte[4096];
                 long total = 0;
@@ -333,10 +347,35 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
             dialog.dismiss();
             if (result != null)
                 Toast.makeText(mThis,"Download error: "+result, Toast.LENGTH_LONG).show();
-            else
-                Toast.makeText(mThis,"LocalFile downloaded", Toast.LENGTH_SHORT).show();
+            else {
+                Toast.makeText(mThis, fileName + " downloaded", Toast.LENGTH_SHORT).show();
+                if (FileUtil.getFileExtension(fileName).equals("rar"))
+                    Decompress.extractArchive(Environment.getExternalStorageDirectory().toString()+"/"+fileName, Environment.getExternalStorageDirectory().toString());
+                else
+                    try {
+                        Decompress.unzip(Environment.getExternalStorageDirectory().toString()+"/"+fileName, Environment.getExternalStorageDirectory().toString());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                moveSubtitleToVideoFolder();
+            }
+
         }
 
+    }
+
+    private void moveSubtitleToVideoFolder() {
+        Intent intent = new Intent(mThis, FilePickerActivity.class);
+        startActivityForResult(intent, SELECT_PICTURE);
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == SELECT_PICTURE) {
+
+            }
+        }
     }
 
     @Override

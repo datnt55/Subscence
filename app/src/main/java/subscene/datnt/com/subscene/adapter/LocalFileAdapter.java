@@ -50,7 +50,7 @@ public class LocalFileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final SubtitleViewHolder mHolder = (SubtitleViewHolder) holder;
         mHolder.fileName.setText(mListFile.get(position).getName());
-        mHolder.path.setText(mListFile.get(position).getPath());
+        mHolder.path.setText(mListFile.get(position).getParent());
         mHolder.imgType.setImageResource(CommonUtils.getVideoIcon(getFileExtension(mListFile.get(position).getName())));
         mHolder.root.setOnClickListener(new View.OnClickListener() {
             @Override

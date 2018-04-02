@@ -13,12 +13,18 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
+import subscene.datnt.com.subscene.thread.GetLanguagesAsynTask;
 import subscene.datnt.com.subscene.thread.SeachFilmAsynTask;
 import subscene.datnt.com.subscene.listener.OnItemClickListener;
 import subscene.datnt.com.subscene.model.Film;
@@ -26,12 +32,19 @@ import subscene.datnt.com.subscene.utils.AudioFileFilter;
 import subscene.datnt.com.subscene.R;
 import subscene.datnt.com.subscene.adapter.LocalFileAdapter;
 
-public class AutoDownloadFragment extends Fragment implements OnItemClickListener, SeachFilmAsynTask.OnSearchFilmListener{
+public class AutoDownloadFragment extends Fragment implements
+        OnItemClickListener,
+        SeachFilmAsynTask.OnSearchFilmListener,
+        GetLanguagesAsynTask.OnGetLanguageListener,
+        AdapterView.OnItemSelectedListener{
     private ProgressBar progressBar;
     private RecyclerView listFilm;
     private ArrayList<File> localFiles = new ArrayList<>();
     private String url = "https://subscene.com/subtitles/title?q=aven&l=";
     private ProgressDialog dialog;
+    private Spinner spnLanguage;
+    private ArrayList<String> languages = new ArrayList<>();
+    private String ownLanguage;
     public AutoDownloadFragment() {
         // Required empty public constructor
     }
@@ -51,13 +64,14 @@ public class AutoDownloadFragment extends Fragment implements OnItemClickListene
         listFilm.setHasFixedSize(true);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         listFilm.setLayoutManager(mLayoutManager);
-
+        spnLanguage = v.findViewById(R.id.spr_language);
         File[] file = Environment.getExternalStorageDirectory().listFiles(new AudioFileFilter());
         //localFiles = new ArrayList<>(Arrays.asList(file));
         getAllMediaFile(file);
         LocalFileAdapter adapter = new LocalFileAdapter(getActivity(),localFiles);
         adapter.setOnItemClickListener(this);
         listFilm.setAdapter(adapter);
+        new GetLanguagesAsynTask(getActivity(),this).execute();
         return v;
     }
 
@@ -119,9 +133,9 @@ public class AutoDownloadFragment extends Fragment implements OnItemClickListene
         String fileName = localFiles.get(position).getName();
         int i = fileName.lastIndexOf('.');
         if (i > 0)
-            fileName = fileName.substring(0,i-1);
+            fileName = fileName.substring(0,i);
         String url  = "https://subscene.com/subtitles/title?q="+fileName+"&l=";
-        new SeachFilmAsynTask(url, this).execute(url);
+        new SeachFilmAsynTask(ownLanguage, this).execute(url);
     }
 
     @Override
@@ -143,5 +157,31 @@ public class AutoDownloadFragment extends Fragment implements OnItemClickListene
     public void onSearchSuccess(String url) {
         dialog.dismiss();
         Toast.makeText(getActivity(), url, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onGetLanguage(ArrayList<String> arrayLanguage) {
+        this.languages = arrayLanguage;
+        Collections.sort(languages, new Comparator<String>() {
+            @Override
+            public int compare(String s1, String s2) {
+                return s1.compareToIgnoreCase(s2);
+            }
+        });
+        spnLanguage.setOnItemSelectedListener(this);
+        ArrayAdapter aa = new ArrayAdapter(getActivity(),android.R.layout.simple_spinner_item,languages);
+        aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spnLanguage.setAdapter(aa);
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+        Toast.makeText(getActivity(), languages.get(i), Toast.LENGTH_LONG).show();
+        ownLanguage = languages.get(i);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+
     }
 }
