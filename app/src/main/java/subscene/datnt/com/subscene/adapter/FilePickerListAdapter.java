@@ -56,11 +56,17 @@ public class FilePickerListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final FileViewHolder mHolder = (FileViewHolder) holder;
         if(mListFile.get(position).isFile()) {
-            // Show the file icon
-            mHolder.imageView.setImageResource(R.drawable.file);
+            mHolder.imageView.setImageResource(CommonUtils.getVideoIcon(getFileExtension(mListFile.get(position).getName())));
+            mHolder.txtCount.setVisibility(View.GONE);
         } else {
-            // Show the folder icon
+            mHolder.txtCount.setVisibility(View.VISIBLE);
             mHolder.imageView.setImageResource(R.drawable.folder);
+            File[] a = mListFile.get(position).listFiles();
+            int count = mListFile.get(position).listFiles().length;
+            if (count <= 1)
+                mHolder.txtCount.setText(count+" item");
+            else
+                mHolder.txtCount.setText(count+" items");
         }
         mHolder.txtName.setText(mListFile.get(position).getName());
         mHolder.root.setOnClickListener(new View.OnClickListener() {
@@ -71,6 +77,7 @@ public class FilePickerListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 }
             }
         });
+
     }
 
     public String getFileExtension( String fileName ) {
@@ -89,12 +96,14 @@ public class FilePickerListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     public static class FileViewHolder extends RecyclerView.ViewHolder {
 
         private final TextView txtName;
+        private final TextView txtCount;
         private final ImageView imageView;
-        private final LinearLayout root;
+        private final RelativeLayout root;
         FileViewHolder(View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.file_picker_image);
             txtName = itemView.findViewById(R.id.file_picker_text);
+            txtCount = itemView.findViewById(R.id.txt_sub_count);
             root = itemView.findViewById(R.id.root);
         }
     }

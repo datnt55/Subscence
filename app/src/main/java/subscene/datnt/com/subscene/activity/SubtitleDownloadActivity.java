@@ -3,22 +3,30 @@ package subscene.datnt.com.subscene.activity;
 import android.animation.ValueAnimator;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.os.PowerManager;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.v4.content.IntentCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.Spanned;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,8 +56,9 @@ import subscene.datnt.com.subscene.model.Subtitle;
 import subscene.datnt.com.subscene.model.SubtitleDetail;
 import subscene.datnt.com.subscene.utils.Decompress;
 import subscene.datnt.com.subscene.utils.FileUtil;
+import subscene.datnt.com.subscene.widget.FilePickerBottomSheet;
 
-public class SubtitleDownloadActivity extends AppCompatActivity {
+public class SubtitleDownloadActivity extends AppCompatActivity implements FilePickerBottomSheet.FilePickerListener {
     private Subtitle subtitle;
     private Film film;
     private LinearLayout subDetail;
@@ -62,7 +71,12 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
     private String linkDownload;
     private int currentHeight = 0;
     private CardView cardView;
-    public final static int SELECT_PICTURE = 100;
+    public ArrayList<File> extractFile;
+    private RelativeLayout layoutShadow;
+    private FilePickerBottomSheet mBottomSheet;
+    private BottomSheetBehavior bottomSheetBehavior;
+    private RelativeLayout layoutContent;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +85,8 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
         setContentView(R.layout.activity_subtitle_download);
         subtitle = (Subtitle) getIntent().getSerializableExtra("Subtitle");
         film = (Film) getIntent().getSerializableExtra("Film");
-
+        layoutContent = findViewById(R.id.layout_content);
+        progressBar = findViewById(R.id.progressBar);
         imgPoster = findViewById(R.id.img_poster);
         options = new DisplayImageOptions.Builder()
                 .showImageOnLoading(R.mipmap.ic_launcher)
@@ -101,6 +116,35 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
         });
         cardView = findViewById(R.id.card_view);
         new SubDetailAsyn().execute(subtitle.getLink());
+
+        initLayoutMigrateSub();
+    }
+
+    private void initLayoutMigrateSub() {
+        layoutShadow = findViewById(R.id.shadow);
+        mBottomSheet = findViewById(R.id.file_picker_bottom_sheet);
+        mBottomSheet.setOnFilePickerListener(this);
+        bottomSheetBehavior = BottomSheetBehavior.from(mBottomSheet);
+        bottomSheetBehavior.setHideable(true);
+        //bottomSheetBehavior.setPeekHeight(126);
+        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED)
+                    layoutShadow.setVisibility(View.VISIBLE);
+                else if (newState == BottomSheetBehavior.STATE_HIDDEN)
+                    layoutShadow.setVisibility(View.GONE);
+                else if (newState == BottomSheetBehavior.STATE_EXPANDED)
+                    layoutShadow.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+
+            }
+        });
+
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
 
     private void changeDetails(int position) {
@@ -114,20 +158,21 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
         }
     }
 
-    private class SubDetailAsyn extends AsyncTask<String, Void, ArrayList<SubtitleDetail>> {
-        private ProgressDialog dialog;
-        public SubDetailAsyn() {
-            dialog = new ProgressDialog(mThis);
-            dialog.setMessage("Loading subtitle list...");
-            dialog.setCancelable(false);
-            dialog.setCanceledOnTouchOutside(false);
+    @Override
+    public void onCopy(String fileName, File path) {
+        if (extractFile.size() == 1) {
+            String extension = FilenameUtils.getExtension(extractFile.get(0).getAbsolutePath());
+            FileUtil.move(fileName + "." + extension, extractFile.get(0), path);
         }
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+    }
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog.show();
-        }
+    @Override
+    public void onCancelCopy() {
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+    }
+
+    private class SubDetailAsyn extends AsyncTask<String, Void, ArrayList<SubtitleDetail>> {
 
         @Override
         protected ArrayList<SubtitleDetail> doInBackground(String... strings) {
@@ -169,6 +214,8 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(ArrayList<SubtitleDetail> subtitleDetails) {
             super.onPostExecute(subtitleDetails);
+            layoutContent.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.GONE);
             arraySubDetail = subtitleDetails;
             for (SubtitleDetail detail : subtitleDetails) {
                 if (detail.getId().equals("details")) {
@@ -178,7 +225,6 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
                     currentHeight = getMeasureOfView(cardView);
                 }
             }
-            dialog.dismiss();
         }
     }
 
@@ -195,9 +241,9 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
                 newHeight = getMeasureOfView(cardView);
 
             }
-        if (!isExist){
+        if (!isExist) {
             TextView text = new TextView(mThis);
-            text.setText("No have "+status);
+            text.setText("No have " + status);
             subDetail.addView(text);
             newHeight = getMeasureOfView(cardView);
         }
@@ -207,7 +253,7 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
             public void onAnimationUpdate(ValueAnimator animation) {
                 final Float fraction = (Float) animation.getAnimatedValue();
                 int x = fraction.intValue();
-                cardView.getLayoutParams().height= x;
+                cardView.getLayoutParams().height = x;
                 cardView.requestLayout();
             }
         });
@@ -230,14 +276,15 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
         }
     }
 
-    public void DownloadSubtitle(View view){
-        new DownloadFileFromURL().execute("https://subscene.com"+linkDownload);
+    public void DownloadSubtitle(View view) {
+        new DownloadFileFromURL().execute("https://subscene.com" + linkDownload);
     }
 
     public class DownloadFileFromURL extends AsyncTask<String, Integer, String> {
         private ProgressDialog dialog;
         private String fileName = "";
         private PowerManager.WakeLock mWakeLock;
+
         public DownloadFileFromURL() {
             dialog = new ProgressDialog(mThis);
             dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -249,7 +296,7 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
         /**
          * Before starting background thread
          * Show Progress Bar Dialog
-         * */
+         */
 
         @Override
         protected void onPreExecute() {
@@ -263,7 +310,7 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
 
         /**
          * Downloading file in background thread
-         * */
+         */
         @Override
         protected String doInBackground(String... f_url) {
             InputStream input = null;
@@ -276,10 +323,9 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
                 long length = Long.parseLong(connection.getHeaderField("Content-Length"));
                 String type = connection.getHeaderField("Content-Type");
                 String content = connection.getHeaderField("Content-Disposition");
-                if ( content != null && content.indexOf ( "=" ) != -1 )
-                {
-                    fileName = content.split ( "=" )[1]; // getting value after '='
-                    fileName = fileName.replaceAll ( "\"", "" ).replaceAll ( "]", "" );
+                if (content != null && content.indexOf("=") != -1) {
+                    fileName = content.split("=")[1]; // getting value after '='
+                    fileName = fileName.replaceAll("\"", "").replaceAll("]", "");
                 }
                 // expect HTTP 200 OK, so we don't mistakenly save error report
                 // instead of the file
@@ -294,7 +340,7 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
 
                 // download the file
                 input = connection.getInputStream();
-                output = new FileOutputStream("/sdcard/"+fileName);
+                output = new FileOutputStream("/sdcard/" + fileName);
 
                 byte data[] = new byte[4096];
                 long total = 0;
@@ -330,7 +376,7 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
 
         /**
          * Updating progress bar
-         * */
+         */
         protected void onProgressUpdate(Integer... progress) {
             // setting progress percentage
             dialog.setProgress(progress[0]);
@@ -339,21 +385,23 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
         /**
          * After completing background task
          * Dismiss the progress dialog
-         * **/
+         **/
         @Override
         protected void onPostExecute(String result) {
             // dismiss the dialog after the file was downloaded
             mWakeLock.release();
             dialog.dismiss();
             if (result != null)
-                Toast.makeText(mThis,"Download error: "+result, Toast.LENGTH_LONG).show();
+                Toast.makeText(mThis, "Download error: " + result, Toast.LENGTH_LONG).show();
             else {
                 Toast.makeText(mThis, fileName + " downloaded", Toast.LENGTH_SHORT).show();
-                if (FileUtil.getFileExtension(fileName).equals("rar"))
-                    Decompress.extractArchive(Environment.getExternalStorageDirectory().toString()+"/"+fileName, Environment.getExternalStorageDirectory().toString());
+                String a = FileUtil.getFileExtension(fileName);
+                String b = FilenameUtils.getExtension(new File("/sdcard/" + fileName).getAbsolutePath());
+                if (FilenameUtils.getExtension(new File("/sdcard/" + fileName).getAbsolutePath()).equals("rar"))
+                    extractFile = Decompress.extractArchive(Environment.getExternalStorageDirectory().toString() + "/" + fileName, Environment.getExternalStorageDirectory().toString());
                 else
                     try {
-                        Decompress.unzip(Environment.getExternalStorageDirectory().toString()+"/"+fileName, Environment.getExternalStorageDirectory().toString());
+                        extractFile = Decompress.unzip(Environment.getExternalStorageDirectory().toString() + "/" + fileName, Environment.getExternalStorageDirectory().toString());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -365,17 +413,28 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
     }
 
     private void moveSubtitleToVideoFolder() {
-        Intent intent = new Intent(mThis, FilePickerActivity.class);
-        startActivityForResult(intent, SELECT_PICTURE);
-    }
-
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
-            if (requestCode == SELECT_PICTURE) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("AppCompatDialog");
+        builder.setMessage("Do you want to move this subtitle to folder of compatible video?");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+                Intent intent = new Intent(mThis, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
 
             }
-        }
+        });
+        builder.show();
+
     }
 
     @Override
@@ -389,4 +448,15 @@ public class SubtitleDownloadActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
+                mBottomSheet.onBackPressed();
+                return true;
+            }
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
 }

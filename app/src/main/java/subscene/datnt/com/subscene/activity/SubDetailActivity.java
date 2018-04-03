@@ -15,9 +15,11 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.Spanned;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -26,6 +28,7 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
+import org.jsoup.UncheckedIOException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -50,6 +53,7 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
     private String year, poster;
     private Toolbar toolbar;
     private TextView txtTitle;
+    private ProgressBar progressBar;
 
     private ArrayList<Subtitle> arraySubtitle = new ArrayList<>();
     @Override
@@ -70,6 +74,7 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
         imgPoster = findViewById(R.id.img_poster);
         txtYear = findViewById(R.id.txt_year);
         listSubtitle = findViewById(R.id.list_sub);
+        progressBar = findViewById(R.id.progressBar);
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -106,18 +111,10 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
     }
 
     private class SubDetailAsyn extends AsyncTask<String, Void, ArrayList<Subtitle>> {
-        private ProgressDialog dialog;
-        public SubDetailAsyn() {
-            dialog = new ProgressDialog(mThis);
-            dialog.setMessage("Loading subtitle list...");
-            dialog.setCancelable(false);
-            dialog.setCanceledOnTouchOutside(false);
-        }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            dialog.show();
         }
 
         @Override
@@ -125,6 +122,7 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
             Document document = null;
             ArrayList<Subtitle> listSubtitle = new ArrayList<>();
             try {
+                Log.e("URL",strings[0]);
                 document = (Document) Jsoup.connect(strings[0]).get();
                 if (document != null) {
                     //Get poster
@@ -164,6 +162,10 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
                 return  null;
             } catch (IOException e) {
                 e.printStackTrace();
+                return listSubtitle;
+            } catch (UncheckedIOException e){
+                e.printStackTrace();
+                return listSubtitle;
             }
             return listSubtitle;
         }
@@ -171,7 +173,8 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
         @Override
         protected void onPostExecute(ArrayList<Subtitle> subtitles) {
             super.onPostExecute(subtitles);
-            if (subtitles == null){
+            progressBar.setVisibility(View.GONE);
+            if (subtitles == null || subtitles.size() == 0){
                 Snackbar snackbar = Snackbar
                         .make(findViewById(R.id.root), "Oops, Fetching data failure ", Snackbar.LENGTH_LONG)
                         .setAction("Try again", new View.OnClickListener() {
@@ -193,7 +196,6 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
             txtYear.setText(getSpannedText(mThis.getResources().getString(R.string.film_year, year)));
             adapter.setOnItemClickListener(SubDetailActivity.this);
             txtTitle.setText("Subtitles for "+ film.getName());
-            dialog.dismiss();
         }
     }
 

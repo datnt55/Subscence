@@ -160,7 +160,7 @@ public class SearchFragment extends Fragment implements OnItemClickListener {
                 listFilm.setVisibility(View.VISIBLE);
                 arrayFilms = films;
                 // Add decoration for dividers between list items
-                // listFilm.addItemDecoration(new DividerDecoration(mThis));
+                // listFilm.addItemDecoration(new MarginDividerDecoration(mThis));
                 listFilm.setVisibility(View.VISIBLE);
                 adapter = null;
                 adapter = new FilmAdapter(arrayFilms, getActivity());

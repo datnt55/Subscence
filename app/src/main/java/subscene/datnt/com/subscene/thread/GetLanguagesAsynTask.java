@@ -22,21 +22,8 @@ import subscene.datnt.com.subscene.utils.Globals;
 
 public class GetLanguagesAsynTask extends AsyncTask<Void, Void, ArrayList<String>> {
     private OnGetLanguageListener listener;
-    private ProgressDialog dialog;
-    private Context context;
     public GetLanguagesAsynTask(Context context, OnGetLanguageListener listener) {
-        this.context = context;
         this.listener = listener;
-    }
-
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-        dialog = new ProgressDialog(context);
-        dialog.setMessage("Prepare data...");
-        dialog.setCancelable(false);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.show();
     }
 
     @Override
@@ -67,7 +54,6 @@ public class GetLanguagesAsynTask extends AsyncTask<Void, Void, ArrayList<String
     @Override
     protected void onPostExecute(ArrayList<String> languages) {
         super.onPostExecute(languages);
-        dialog.dismiss();
         if (listener != null )
             listener.onGetLanguage(languages);
     }

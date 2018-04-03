@@ -20,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
+import subscene.datnt.com.subscene.thread.PopularSubtitleAsynTask;
 import subscene.datnt.com.subscene.utils.Globals;
 import subscene.datnt.com.subscene.R;
 import subscene.datnt.com.subscene.widget.CoordinatorLayoutBottomSheetBehavior;
@@ -49,7 +50,8 @@ public class MainActivity extends AppCompatActivity{
     };
     private PopularFragment popularFragment;
     private AutoDownloadFragment autoDownloadFragment;
-    private RelativeLayout layoutShadow;
+    private DownloadedFragment downloadedFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,35 +60,8 @@ public class MainActivity extends AppCompatActivity{
         mThis = this;
         progressBar = findViewById(R.id.progressBar);
         layoutSearch = findViewById(R.id.layout_search);
-       // listFilm = findViewById(R.id.list_film);
-        // Set layout manager
-        layoutShadow = findViewById(R.id.shadow);
-        int orientation = getLayoutManagerOrientation(getResources().getConfiguration().orientation);
-        final LinearLayoutManager layoutManager = new LinearLayoutManager(this, orientation, false);
         initSearchLayout();
         initViewPager();
-        final FilePickerBottomSheet mBottomSheet = findViewById(R.id.file_picker_bottom_sheet);
-
-        BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(mBottomSheet);
-        bottomSheetBehavior.setHideable(true);
-        //bottomSheetBehavior.setPeekHeight(126);
-        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                if (newState == BottomSheetBehavior.STATE_COLLAPSED)
-                    layoutShadow.setVisibility(View.VISIBLE);
-                else if (newState == BottomSheetBehavior.STATE_HIDDEN)
-                    layoutShadow.setVisibility(View.GONE);
-                else if (newState == BottomSheetBehavior.STATE_EXPANDED)
-                    layoutShadow.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                layoutShadow.setVisibility(View.VISIBLE);
-                layoutShadow.setAlpha(slideOffset);
-            }
-        });
     }
 
     private void initViewPager() {
@@ -102,14 +77,17 @@ public class MainActivity extends AppCompatActivity{
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         popularFragment = new PopularFragment();
         autoDownloadFragment = new AutoDownloadFragment();
+        downloadedFragment = new DownloadedFragment();
 
         adapter.addFrag(popularFragment, "Popular Subtitle");
         adapter.addFrag(autoDownloadFragment, "Auto Download");
+        adapter.addFrag(downloadedFragment, "Downloaded");
         viewPager.setAdapter(adapter);
     }
     private void setupTabIcons() {
-        tabLayout.getTabAt(0).setIcon(tabIcons[0]);
-        tabLayout.getTabAt(1).setIcon(tabIcons[1]);
+        tabLayout.getTabAt(0).setText("Popular Subs");
+        tabLayout.getTabAt(1).setText("Auto Download");
+        tabLayout.getTabAt(2).setText("Downloaded");
 //        tabLayout.getTabAt(0).getIcon().setColorFilter(ContextCompat.getColor(mThis, R.color.blue_light), PorterDuff.Mode.SRC_IN);
 //        tabLayout.getTabAt(1).getIcon().setColorFilter(ContextCompat.getColor(mThis, R.color.grey_1), PorterDuff.Mode.SRC_IN);
 //        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {

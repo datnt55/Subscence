@@ -24,16 +24,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import subscene.datnt.com.subscene.thread.GetLanguagesAsynTask;
-import subscene.datnt.com.subscene.thread.SeachFilmAsynTask;
-import subscene.datnt.com.subscene.listener.OnItemClickListener;
-import subscene.datnt.com.subscene.model.Film;
-import subscene.datnt.com.subscene.utils.AudioFileFilter;
 import subscene.datnt.com.subscene.R;
 import subscene.datnt.com.subscene.adapter.LocalFileAdapter;
+import subscene.datnt.com.subscene.listener.OnItemClickListener;
+import subscene.datnt.com.subscene.thread.SeachFilmAsynTask;
+import subscene.datnt.com.subscene.utils.AudioFileFilter;
 import subscene.datnt.com.subscene.utils.SharePreference;
 
-public class AutoDownloadFragment extends Fragment implements
+public class DownloadedFragment extends Fragment implements
         OnItemClickListener,
         SeachFilmAsynTask.OnSearchFilmListener,
         AdapterView.OnItemSelectedListener{
@@ -45,7 +43,7 @@ public class AutoDownloadFragment extends Fragment implements
     private Spinner spnLanguage;
     private ArrayList<String> languages = new ArrayList<>();
     private String ownLanguage;
-    public AutoDownloadFragment() {
+    public DownloadedFragment() {
         // Required empty public constructor
     }
 
@@ -120,7 +118,7 @@ public class AutoDownloadFragment extends Fragment implements
         } else {
             builder = new AlertDialog.Builder(getActivity());
         }
-        builder.setTitle("Subtitle Downloader")
+        builder.setTitle("ISub")
                 .setMessage("Do not found subtitle fit your file")
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {

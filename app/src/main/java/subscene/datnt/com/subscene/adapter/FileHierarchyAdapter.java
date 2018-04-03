@@ -28,7 +28,7 @@ public class FileHierarchyAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     private final Context mContext;
     private final ArrayList<File> mListFile = new ArrayList<>();
-    private OnItemClickListener listener;
+    private OnFileClickListener listener;
 
     public FileHierarchyAdapter(Context mContext, File root) {
         this.mContext = mContext;
@@ -50,7 +50,7 @@ public class FileHierarchyAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
         notifyDataSetChanged();
     }
-    public void setOnItemClickListener(OnItemClickListener listener){
+    public void setOnItemClickListener(OnFileClickListener listener){
         this.listener = listener;
     }
 
@@ -73,7 +73,13 @@ public class FileHierarchyAdapter extends RecyclerView.Adapter<RecyclerView.View
         else
             mHolder.img.setVisibility(View.VISIBLE);
         mHolder.txtName.setText(mListFile.get(position).getName());
-
+        mHolder.txtName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (listener != null)
+                    listener.onFilePathClick(mListFile.get(position));
+            }
+        });
     }
 
     public String getFileExtension( String fileName ) {
@@ -98,5 +104,8 @@ public class FileHierarchyAdapter extends RecyclerView.Adapter<RecyclerView.View
             img = itemView.findViewById(R.id.imageView);
         }
     }
+    public interface  OnFileClickListener{
+        void onFilePathClick(File directory);
 
+    }
 }
