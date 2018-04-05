@@ -1,11 +1,14 @@
 package subscene.datnt.com.subscene.widget;
 
 import android.content.Context;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -26,7 +29,10 @@ import subscene.datnt.com.subscene.listener.OnItemClickListener;
  * Created by DatNT on 4/2/2018.
  */
 
-public class FilePickerBottomSheet extends RelativeLayout implements OnItemClickListener, FileHierarchyAdapter.OnFileClickListener, View.OnClickListener {
+public class FilePickerBottomSheet extends RelativeLayout implements
+        OnItemClickListener,
+        View.OnClickListener,
+        PathFileView.FilePathSelectListener{
     private Context mContext;
     public final static String EXTRA_FILE_PATH = "file_path";
 
@@ -38,15 +44,17 @@ public class FilePickerBottomSheet extends RelativeLayout implements OnItemClick
 
     protected File mDirectory;
     protected ArrayList<File> mFiles;
+    private final ArrayList<File> mListFilePath = new ArrayList<>();
     protected FilePickerListAdapter mAdapter;
-    private FileHierarchyAdapter adapter;
+    //private FileHierarchyAdapter adapter;
     protected boolean mShowHiddenFiles = false;
     protected String[] acceptedFileExtensions;
-    private RecyclerView listFolder, listHierarchy;
+    private RecyclerView listFolder;
     private TextView txtNoFiles, txtOk, txtCancel;
     private FilePickerListener listener;
     private String fileName;
-
+    private LinearLayout layoutPath;
+    private HorizontalScrollView scrollView;
     public FilePickerBottomSheet(Context context) {
         super(context);
         mContext = context;
@@ -83,25 +91,53 @@ public class FilePickerBottomSheet extends RelativeLayout implements OnItemClick
         MarginDividerDecoration dividerItemDecoration = new MarginDividerDecoration(mContext);
         listFolder.addItemDecoration(dividerItemDecoration);
 
-        listHierarchy = view.findViewById(R.id.list_hierarchy);
-        LinearLayoutManager hLayoutManager = new LinearLayoutManager(mContext,LinearLayoutManager.HORIZONTAL, false);
-        listHierarchy.setLayoutManager(hLayoutManager);
-
+       // listHierarchy = view.findViewById(R.id.list_hierarchy);
+      //  LinearLayoutManager hLayoutManager = new LinearLayoutManager(mContext,LinearLayoutManager.HORIZONTAL, false);
+       // listHierarchy.setLayoutManager(hLayoutManager);
+       // listFolder.setNestedScrollingEnabled(false);
         mDirectory = new File(DEFAULT_INITIAL_DIRECTORY);
         mFiles = new ArrayList<File>();
         mAdapter = new FilePickerListAdapter(mContext, mFiles);
         mAdapter.setOnItemClickListener(this);
         listFolder.setAdapter(mAdapter);
 
-        adapter = new FileHierarchyAdapter(mContext, mDirectory);
-        adapter.setOnItemClickListener(this);
-        listHierarchy.setAdapter(adapter);
+        layoutPath = view.findViewById(R.id.layout_path);
+        scrollView = view.findViewById(R.id.list_hierarchy);
+        //adapter = new FileHierarchyAdapter(mContext, mDirectory);
+        //adapter.setOnItemClickListener(this);
+       // listHierarchy.setAdapter(adapter);
 
         acceptedFileExtensions = new String[] {};
         mShowHiddenFiles = false;
         refreshFilesList();
+
     }
 
+    private void getListFilePath(){
+        layoutPath.removeAllViews();
+        File temp = new File(mDirectory.getAbsolutePath());
+        PathFileView view = new PathFileView(mContext,temp,this);
+        view.setCurrent();
+        if (temp.getName().equals("sdcard"))
+            view.setRoot();
+        layoutPath.addView(view);
+        while (!temp.getName().equals("sdcard")){
+            view = new PathFileView(mContext,temp.getParentFile(),this);
+            if (temp.getParentFile().getName().equals("sdcard"))
+                view.setRoot();
+            layoutPath.addView(view,0);
+            temp = temp.getParentFile();
+        }
+        scrollView.post(new Runnable() {
+            @Override
+
+            public void run() {
+
+                scrollView.fullScroll(View.FOCUS_RIGHT);
+
+            }
+        });
+    }
     /**
      * Updates the list view to the current directory
      */
@@ -126,7 +162,7 @@ public class FilePickerBottomSheet extends RelativeLayout implements OnItemClick
             txtNoFiles.setVisibility(VISIBLE);
             listFolder.setVisibility(GONE);
         }
-        adapter.updateHierarchy(mDirectory);
+        getListFilePath();
     }
 
     public void onBackPressed() {
@@ -153,12 +189,6 @@ public class FilePickerBottomSheet extends RelativeLayout implements OnItemClick
     }
 
     @Override
-    public void onFilePathClick(File directory) {
-        mDirectory = directory;
-        refreshFilesList();
-    }
-
-    @Override
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.txt_cancel:
@@ -168,6 +198,12 @@ public class FilePickerBottomSheet extends RelativeLayout implements OnItemClick
             case R.id.txt_ok:
                 break;
         }
+    }
+
+    @Override
+    public void onPathSelect(File file) {
+        mDirectory = file;
+        refreshFilesList();
     }
 
     private class FileComparator implements Comparator<File> {

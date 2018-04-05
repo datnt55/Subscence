@@ -14,13 +14,19 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import java.io.File;
 
 import subscene.datnt.com.subscene.thread.PopularSubtitleAsynTask;
+import subscene.datnt.com.subscene.thread.YifySubtitles;
 import subscene.datnt.com.subscene.utils.Globals;
 import subscene.datnt.com.subscene.R;
 import subscene.datnt.com.subscene.widget.CoordinatorLayoutBottomSheetBehavior;
@@ -29,7 +35,7 @@ import subscene.datnt.com.subscene.widget.SearchEditTextLayout;
 import subscene.datnt.com.subscene.adapter.ViewPagerAdapter;
 import subscene.datnt.com.subscene.utils.CommonUtils;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity implements DownloadedFragment.OnDataPass, FilePickerBottomSheet.FilePickerListener {
     private String url = "https://subscene.com/subtitles/title?q=avenger&l=";
     //private RecyclerView listFilm;
     private Context mThis;
@@ -51,6 +57,9 @@ public class MainActivity extends AppCompatActivity{
     private PopularFragment popularFragment;
     private AutoDownloadFragment autoDownloadFragment;
     private DownloadedFragment downloadedFragment;
+    private FilePickerBottomSheet mBottomSheet;
+    private BottomSheetBehavior bottomSheetBehavior;
+    private RelativeLayout layoutShadow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +71,36 @@ public class MainActivity extends AppCompatActivity{
         layoutSearch = findViewById(R.id.layout_search);
         initSearchLayout();
         initViewPager();
+        initBottomSheet();
+        YifySubtitles yifySubtitles = new YifySubtitles(null);
+        yifySubtitles.getMovieSubsByName("avenger","");
+    }
+
+    private void initBottomSheet() {
+        layoutShadow = findViewById(R.id.shadow);
+        mBottomSheet = findViewById(R.id.file_picker_bottom_sheet);
+        mBottomSheet.setOnFilePickerListener(this);
+        bottomSheetBehavior = BottomSheetBehavior.from(mBottomSheet);
+        bottomSheetBehavior.setHideable(true);
+        //bottomSheetBehavior.setPeekHeight(126);
+        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED)
+                    layoutShadow.setVisibility(View.VISIBLE);
+                else if (newState == BottomSheetBehavior.STATE_HIDDEN)
+                    layoutShadow.setVisibility(View.GONE);
+                else if (newState == BottomSheetBehavior.STATE_EXPANDED)
+                    layoutShadow.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+
+            }
+        });
+
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
 
     private void initViewPager() {
@@ -117,8 +156,21 @@ public class MainActivity extends AppCompatActivity{
         searchEditTextLayout.setOnClickListener(mSearchViewOnClickListener);
         searchEditTextLayout.setCallback(searchEditTextActionListener);
         mSearchView.addTextChangedListener(mPhoneSearchQueryTextListener);
+        mSearchView.setOnEditorActionListener(mPhoneSearchClickListener);
     }
 
+    private TextView.OnEditorActionListener mPhoneSearchClickListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                Intent intent = new Intent(mThis, ListSearchResultActivity.class);
+                intent.putExtra("Search",mSearchQuery);
+                startActivity(intent);
+                return true;
+            }
+            return false;
+        }
+    };
     // Action when click to components of search view
     private SearchEditTextLayout.Callback searchEditTextActionListener = new SearchEditTextLayout.Callback() {
         @Override
@@ -198,6 +250,8 @@ public class MainActivity extends AppCompatActivity{
             popularFragment.getView().animate().alpha(0).withLayer();
         if (autoDownloadFragment.isVisible() && autoDownloadFragment.getView() != null && autoDownloadFragment.getView().animate() != null)
             autoDownloadFragment.getView().animate().alpha(0).withLayer();
+        if (downloadedFragment.isVisible() && downloadedFragment.getView() != null && downloadedFragment.getView().animate() != null)
+            downloadedFragment.getView().animate().alpha(0).withLayer();
     }
 
     private void showComponentWhenSearchViewHide() {
@@ -207,6 +261,8 @@ public class MainActivity extends AppCompatActivity{
             popularFragment.getView().animate().alpha(1).withLayer();
         if (autoDownloadFragment.isVisible() && autoDownloadFragment.getView() != null && autoDownloadFragment.getView().animate() != null)
             autoDownloadFragment.getView().animate().alpha(1).withLayer();
+        if (downloadedFragment.isVisible() && downloadedFragment.getView() != null && downloadedFragment.getView().animate() != null)
+            downloadedFragment.getView().animate().alpha(1).withLayer();
     }
 
     private int getLayoutManagerOrientation(int activityOrientation) {
@@ -254,4 +310,31 @@ public class MainActivity extends AppCompatActivity{
     }
 
 
+    @Override
+    public void onDataPass(File file) {
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+    }
+
+    @Override
+    public void onCopy(String filename, File path) {
+
+    }
+
+    @Override
+    public void onCancelCopy() {
+
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
+                mBottomSheet.onBackPressed();
+                return true;
+            }
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
 }

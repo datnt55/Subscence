@@ -3,6 +3,7 @@ package subscene.datnt.com.subscene.activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -65,61 +66,42 @@ public class AutoDownloadFragment extends Fragment implements
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         listFilm.setLayoutManager(mLayoutManager);
         spnLanguage = v.findViewById(R.id.spr_language);
-        fetchListLanguage();
-        File[] file = Environment.getExternalStorageDirectory().listFiles(new AudioFileFilter());
-        //localFiles = new ArrayList<>(Arrays.asList(file));
-        getAllMediaFile(file);
-        LocalFileAdapter adapter = new LocalFileAdapter(getActivity(),localFiles);
-        adapter.setOnItemClickListener(this);
-        listFilm.setAdapter(adapter);
+        new GetAllFileInStorage().execute();
         return v;
     }
 
-    private void fetchListLanguage() {
-        SharePreference preference = new SharePreference(getActivity());
-        this.languages = preference.getLanguage();
-        Collections.sort(languages, new Comparator<String>() {
-            @Override
-            public int compare(String s1, String s2) {
-                return s1.compareToIgnoreCase(s2);
-            }
-        });
-        spnLanguage.setOnItemSelectedListener(this);
-        ArrayAdapter aa = new ArrayAdapter(getActivity(),android.R.layout.simple_spinner_item,languages);
-        aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spnLanguage.setAdapter(aa);
-    }
 
-    private void getAllMediaFile(File[] file) {
+    private ArrayList<File> getAllMediaFile(File[] file) {
+        ArrayList<File> files = new ArrayList<>();
         AudioFileFilter fileFilter = new AudioFileFilter();
         for (int i = 0 ; i < file.length; i++){
             File subFile = file[i];
-            if (subFile.isDirectory())
-                getAllMediaFileInFolder(subFile);
+            if (subFile.isDirectory()) {
+                files.addAll(getAllMediaFileInFolder(subFile));
+            }
             else if (fileFilter.checkFileExtension(subFile))
-                localFiles.add(subFile);
+                files.add(subFile);
         }
+        return files;
     }
 
-    private void getAllMediaFileInFolder(File file){
+    private ArrayList<File> getAllMediaFileInFolder(File file){
+        ArrayList<File> files = new ArrayList<>();
         AudioFileFilter fileFilter = new AudioFileFilter();
         for (File f : file.listFiles())
         {
             if (f.isDirectory())
-                getAllMediaFileInFolder(f);
+                files.addAll(getAllMediaFileInFolder(f));
             else if (fileFilter.checkFileExtension(f))
-                localFiles.add(f);
+                files.add(f);
         }
+        return files;
     }
 
 
     private void showDialogNoResult() {
         AlertDialog.Builder builder;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder = new AlertDialog.Builder(getActivity(), android.R.style.Theme_Material_Dialog_Alert);
-        } else {
-            builder = new AlertDialog.Builder(getActivity());
-        }
+        builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Subtitle Downloader")
                 .setMessage("Do not found subtitle fit your file")
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
@@ -183,5 +165,37 @@ public class AutoDownloadFragment extends Fragment implements
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
 
+    }
+
+    private class GetAllFileInStorage extends AsyncTask<Void, Void, ArrayList<File>>{
+
+        @Override
+        protected ArrayList<File> doInBackground(Void... voids) {
+            SharePreference preference = new SharePreference(getActivity());
+            languages = preference.getLanguage();
+            Collections.sort(languages, new Comparator<String>() {
+                @Override
+                public int compare(String s1, String s2) {
+                    return s1.compareToIgnoreCase(s2);
+                }
+            });
+            File[] file = Environment.getExternalStorageDirectory().listFiles(new AudioFileFilter());
+            return  getAllMediaFile(file);
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<File> files) {
+            super.onPostExecute(files);
+            progressBar.setVisibility(View.GONE);
+            localFiles = files;
+            LocalFileAdapter adapter = new LocalFileAdapter(getActivity(),localFiles);
+            adapter.setOnItemClickListener(AutoDownloadFragment.this);
+            listFilm.setAdapter(adapter);
+
+            spnLanguage.setOnItemSelectedListener(AutoDownloadFragment.this);
+            ArrayAdapter aa = new ArrayAdapter(getActivity(),android.R.layout.simple_spinner_item,languages);
+            aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spnLanguage.setAdapter(aa);
+        }
     }
 }

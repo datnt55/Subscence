@@ -6,6 +6,8 @@ import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -25,24 +28,27 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import subscene.datnt.com.subscene.R;
+import subscene.datnt.com.subscene.adapter.DownloadFileAdapter;
 import subscene.datnt.com.subscene.adapter.LocalFileAdapter;
 import subscene.datnt.com.subscene.listener.OnItemClickListener;
 import subscene.datnt.com.subscene.thread.SeachFilmAsynTask;
 import subscene.datnt.com.subscene.utils.AudioFileFilter;
 import subscene.datnt.com.subscene.utils.SharePreference;
+import subscene.datnt.com.subscene.widget.FilePickerBottomSheet;
 
-public class DownloadedFragment extends Fragment implements
-        OnItemClickListener,
-        SeachFilmAsynTask.OnSearchFilmListener,
-        AdapterView.OnItemSelectedListener{
+import static subscene.datnt.com.subscene.utils.Globals.APP_FOLDER;
+
+public class DownloadedFragment extends Fragment implements DownloadFileAdapter.OnDownloadedFileClickListener{
     private ProgressBar progressBar;
-    private RecyclerView listFilm;
-    private ArrayList<File> localFiles = new ArrayList<>();
-    private String url = "https://subscene.com/subtitles/title?q=aven&l=";
-    private ProgressDialog dialog;
-    private Spinner spnLanguage;
-    private ArrayList<String> languages = new ArrayList<>();
-    private String ownLanguage;
+    private RecyclerView listFileDownloaded;
+    private ArrayList<File> downloadedFiles = new ArrayList<>();
+    private DownloadFileAdapter adapter;
+
+    public interface OnDataPass {
+        public void onDataPass(File data);
+    }
+
+    private OnDataPass dataPasser;
     public DownloadedFragment() {
         // Required empty public constructor
     }
@@ -56,83 +62,33 @@ public class DownloadedFragment extends Fragment implements
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v =  inflater.inflate(R.layout.fragment_auto_download, container, false);
+        View v =  inflater.inflate(R.layout.fragment_downloaded, container, false);
         progressBar = v.findViewById(R.id.progressBar);
-        listFilm = v.findViewById(R.id.list_local_file);
-        listFilm.setHasFixedSize(true);
+        listFileDownloaded = v.findViewById(R.id.list_download_file);
+        listFileDownloaded.setHasFixedSize(true);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
-        listFilm.setLayoutManager(mLayoutManager);
-        spnLanguage = v.findViewById(R.id.spr_language);
-        fetchListLanguage();
-        File[] file = Environment.getExternalStorageDirectory().listFiles(new AudioFileFilter());
-        //localFiles = new ArrayList<>(Arrays.asList(file));
-        getAllMediaFile(file);
-        LocalFileAdapter adapter = new LocalFileAdapter(getActivity(),localFiles);
+        listFileDownloaded.setLayoutManager(mLayoutManager);
+        getListDownloadedFile();
+
+        adapter = new DownloadFileAdapter(getActivity(), downloadedFiles);
         adapter.setOnItemClickListener(this);
-        listFilm.setAdapter(adapter);
+        listFileDownloaded.setAdapter(adapter);
+        progressBar.setVisibility(View.GONE);
         return v;
     }
 
-    private void fetchListLanguage() {
-        SharePreference preference = new SharePreference(getActivity());
-        this.languages = preference.getLanguage();
-        Collections.sort(languages, new Comparator<String>() {
-            @Override
-            public int compare(String s1, String s2) {
-                return s1.compareToIgnoreCase(s2);
-            }
-        });
-        spnLanguage.setOnItemSelectedListener(this);
-        ArrayAdapter aa = new ArrayAdapter(getActivity(),android.R.layout.simple_spinner_item,languages);
-        aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spnLanguage.setAdapter(aa);
-    }
-
-    private void getAllMediaFile(File[] file) {
-        AudioFileFilter fileFilter = new AudioFileFilter();
-        for (int i = 0 ; i < file.length; i++){
-            File subFile = file[i];
-            if (subFile.isDirectory())
-                getAllMediaFileInFolder(subFile);
-            else if (fileFilter.checkFileExtension(subFile))
-                localFiles.add(subFile);
+    private void getListDownloadedFile() {
+        downloadedFiles = new ArrayList<>();
+        File root = new File(APP_FOLDER);
+        for (File file : root.listFiles()){
+            downloadedFiles.add(file);
         }
-    }
-
-    private void getAllMediaFileInFolder(File file){
-        AudioFileFilter fileFilter = new AudioFileFilter();
-        for (File f : file.listFiles())
-        {
-            if (f.isDirectory())
-                getAllMediaFileInFolder(f);
-            else if (fileFilter.checkFileExtension(f))
-                localFiles.add(f);
-        }
-    }
-
-
-    private void showDialogNoResult() {
-        AlertDialog.Builder builder;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder = new AlertDialog.Builder(getActivity(), android.R.style.Theme_Material_Dialog_Alert);
-        } else {
-            builder = new AlertDialog.Builder(getActivity());
-        }
-        builder.setTitle("ISub")
-                .setMessage("Do not found subtitle fit your file")
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // continue with delete
-                        dialog.dismiss();
-                    }
-                })
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .show();
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        dataPasser = (OnDataPass) context;
     }
 
     @Override
@@ -142,44 +98,35 @@ public class DownloadedFragment extends Fragment implements
     }
 
     @Override
-    public void onItemClick(int position) {
-        String fileName = localFiles.get(position).getName();
-        int i = fileName.lastIndexOf('.');
-        if (i > 0)
-            fileName = fileName.substring(0,i);
-        String url  = "https://subscene.com/subtitles/title?q="+fileName+"&l=";
-        new SeachFilmAsynTask(ownLanguage, this).execute(url);
+    public void onFileMove(int position) {
+        if (dataPasser != null)
+            dataPasser.onDataPass(downloadedFiles.get(position));
     }
 
     @Override
-    public void onStartSearch() {
-        dialog = new ProgressDialog(getActivity());
-        dialog.setMessage("Searching subtitle...");
-        dialog.setCancelable(false);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.show();
-    }
-
-    @Override
-    public void onSearchNoResult() {
-        dialog.dismiss();
-        showDialogNoResult();
-    }
-
-    @Override
-    public void onSearchSuccess(String url) {
-        dialog.dismiss();
-        Toast.makeText(getActivity(), url, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-        Toast.makeText(getActivity(), languages.get(i), Toast.LENGTH_LONG).show();
-        ownLanguage = languages.get(i);
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> adapterView) {
+    public void onFileDelete(final int position) {
+        AlertDialog.Builder builder;
+        builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Notice")
+                .setMessage("Do you want to delete "+downloadedFiles.get(position).getName()+ " ?")
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // continue with delete
+                        dialog.dismiss();
+                        downloadedFiles.get(position).delete();
+                        downloadedFiles.remove(position);
+                        adapter.notifyItemRemoved(position);
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
 
     }
+
 }

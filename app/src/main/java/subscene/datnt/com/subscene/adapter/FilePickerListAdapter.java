@@ -85,7 +85,7 @@ public class FilePickerListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         if (i > 0) {
             return fileName.substring(i+1);
         } else
-            return null;
+            return "";
     }
 
     @Override

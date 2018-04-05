@@ -1,12 +1,14 @@
 package subscene.datnt.com.subscene.widget;
 
 import android.content.Context;
-import android.support.design.widget.BottomSheetBehavior;
+import android.graphics.Typeface;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -27,205 +29,67 @@ import subscene.datnt.com.subscene.listener.OnItemClickListener;
  * Created by DatNT on 4/2/2018.
  */
 
-public class FilePickerBottomSheet extends RelativeLayout implements OnItemClickListener, FileHierarchyAdapter.OnFileClickListener, View.OnClickListener {
+public class PathFileView extends LinearLayout {
     private Context mContext;
-    public final static String EXTRA_FILE_PATH = "file_path";
+    private ImageView img;
+    private TextView txtName;
+    private File file;
+    private FilePathSelectListener listener;
 
-    public final static String EXTRA_SHOW_HIDDEN_FILES = "show_hidden_files";
-
-    public final static String EXTRA_ACCEPTED_FILE_EXTENSIONS = "accepted_file_extensions";
-
-    private final static String DEFAULT_INITIAL_DIRECTORY = "/sdcard/";
-
-    protected File mDirectory;
-    protected ArrayList<File> mFiles;
-    protected FilePickerListAdapter mAdapter;
-    //private FileHierarchyAdapter adapter;
-    protected boolean mShowHiddenFiles = false;
-    protected String[] acceptedFileExtensions;
-    private RecyclerView listFolder;
-    private TextView txtNoFiles, txtOk, txtCancel;
-    private FilePickerListener listener;
-    private String fileName;
-
-    public FilePickerBottomSheet(Context context) {
+    public PathFileView(Context context, File file,FilePathSelectListener listener ) {
         super(context);
         mContext = context;
+        this.file = file;
+        this.listener = listener;
         initLayout();
     }
 
-    public FilePickerBottomSheet(Context context, AttributeSet attrs) {
+    public PathFileView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
         initLayout();
     }
 
-    public FilePickerBottomSheet(Context context, AttributeSet attrs, int defStyleAttr) {
+    public PathFileView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mContext = context;
         initLayout();
     }
 
-    public void setOnFilePickerListener(FilePickerListener listener){
-        this.listener = listener;
-    }
+
     private void initLayout() {
         LayoutInflater mInflater = LayoutInflater.from(mContext);
-        View view = mInflater.inflate(R.layout.file_picker_empty_view, this, true);
-        txtNoFiles = view.findViewById(R.id.txt_no_file);
-        txtOk = view.findViewById(R.id.txt_ok);
-        txtOk.setOnClickListener(this);
-        txtCancel = view.findViewById(R.id.txt_cancel);
-        txtCancel.setOnClickListener(this);
-        listFolder = view.findViewById(R.id.list_folder);
-        listFolder.setHasFixedSize(true);
-        LinearLayoutManager mLayoutManager = new LinearLayoutManager(mContext);
-        listFolder.setLayoutManager(mLayoutManager);
-        MarginDividerDecoration dividerItemDecoration = new MarginDividerDecoration(mContext);
-        listFolder.addItemDecoration(dividerItemDecoration);
-
-       // listHierarchy = view.findViewById(R.id.list_hierarchy);
-      //  LinearLayoutManager hLayoutManager = new LinearLayoutManager(mContext,LinearLayoutManager.HORIZONTAL, false);
-       // listHierarchy.setLayoutManager(hLayoutManager);
-       // listFolder.setNestedScrollingEnabled(false);
-        mDirectory = new File(DEFAULT_INITIAL_DIRECTORY);
-        mFiles = new ArrayList<File>();
-        mAdapter = new FilePickerListAdapter(mContext, mFiles);
-        mAdapter.setOnItemClickListener(this);
-        listFolder.setAdapter(mAdapter);
-
-        //adapter = new FileHierarchyAdapter(mContext, mDirectory);
-        //adapter.setOnItemClickListener(this);
-       // listHierarchy.setAdapter(adapter);
-
-        acceptedFileExtensions = new String[] {};
-        mShowHiddenFiles = false;
-        refreshFilesList();
-        listFolder.setOnScrollListener(new RecyclerView.OnScrollListener() {
+        View view = mInflater.inflate(R.layout.view_path_file, this, true);
+        txtName = view.findViewById(R.id.txt_node);
+        img = view.findViewById(R.id.imageView);
+        txtName.setText(file.getAbsolutePath().substring(file.getAbsolutePath().lastIndexOf("/")+1));
+        txtName.setOnClickListener(new OnClickListener() {
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                //mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-            }
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
+            public void onClick(View view) {
+                if (listener !=null)
+                    listener.onPathSelect(file);
             }
         });
     }
 
-    /**
-     * Updates the list view to the current directory
-     */
-    protected void refreshFilesList() {
-        mFiles.clear();
-        ExtensionFilenameFilter filter = new ExtensionFilenameFilter(acceptedFileExtensions);
-
-        File[] files = mDirectory.listFiles(filter);
-        if(files != null && files.length > 0) {
-            for(File f : files) {
-                if(f.isHidden() && !mShowHiddenFiles) {
-                    continue;
-                }
-                mFiles.add(f);
-            }
-
-            Collections.sort(mFiles, new FileComparator());
-            mAdapter.notifyDataSetChanged();
-            txtNoFiles.setVisibility(GONE);
-            listFolder.setVisibility(VISIBLE);
-        }else {
-            txtNoFiles.setVisibility(VISIBLE);
-            listFolder.setVisibility(GONE);
-        }
-       // adapter.updateHierarchy(mDirectory);
+    public void setRoot(){
+        img.setVisibility(GONE);
     }
 
-    public void onBackPressed() {
-        if (mDirectory.getAbsolutePath().equals("/sdcard"))
-            return;
-        if(mDirectory.getParentFile() != null) {
-            mDirectory = mDirectory.getParentFile();
-            refreshFilesList();
-            return;
-        }
+    public void setCurrent(){
+        txtName.setTypeface(Typeface.DEFAULT_BOLD);
     }
 
-    @Override
-    public void onItemClick(int position) {
-        File newFile = mFiles.get(position);
-        if(newFile.isFile()) {
-            if (listener != null)
-                listener.onCopy(FilenameUtils.getBaseName(newFile.getAbsolutePath()), mDirectory);
-        } else {
-            mDirectory = newFile;
-            // Update the files list
-            refreshFilesList();
-        }
+    public File getFile() {
+        return file;
     }
 
-    @Override
-    public void onFilePathClick(File directory) {
-        mDirectory = directory;
-        refreshFilesList();
+    public void setFile(File file) {
+        this.file = file;
     }
 
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()){
-            case R.id.txt_cancel:
-                if (listener != null)
-                    listener.onCancelCopy();
-                break;
-            case R.id.txt_ok:
-                break;
-        }
+    public interface FilePathSelectListener{
+        void onPathSelect(File file);
     }
 
-    private class FileComparator implements Comparator<File> {
-        @Override
-        public int compare(File f1, File f2) {
-            if(f1 == f2) {
-                return 0;
-            }
-            if(f1.isDirectory() && f2.isFile()) {
-                return -1;
-            }
-            if(f1.isFile() && f2.isDirectory()) {
-                return 1;
-            }
-            return f1.getName().compareToIgnoreCase(f2.getName());
-        }
-    }
-
-    private class ExtensionFilenameFilter implements FilenameFilter {
-        private String[] mExtensions;
-
-        public ExtensionFilenameFilter(String[] extensions) {
-            super();
-            mExtensions = extensions;
-        }
-
-        @Override
-        public boolean accept(File dir, String filename) {
-            if(new File(dir, filename).isDirectory()) {
-                return true;
-            }
-            if(mExtensions != null && mExtensions.length > 0) {
-                for(int i = 0; i < mExtensions.length; i++) {
-                    if(filename.endsWith(mExtensions[i])) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-            return true;
-        }
-    }
-
-    public interface FilePickerListener{
-        void onCopy(String filename, File path);
-        void onCancelCopy();
-    }
 }

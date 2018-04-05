@@ -8,7 +8,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Environment;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
@@ -27,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,17 +51,23 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import co.ceryle.segmentedbutton.SegmentedButtonGroup;
+import subscene.datnt.com.subscene.listener.OnSceneListener;
 import subscene.datnt.com.subscene.model.Film;
 import subscene.datnt.com.subscene.R;
+import subscene.datnt.com.subscene.model.PopularFilm;
 import subscene.datnt.com.subscene.model.Subtitle;
 import subscene.datnt.com.subscene.model.SubtitleDetail;
+import subscene.datnt.com.subscene.thread.Subscene;
 import subscene.datnt.com.subscene.utils.Decompress;
 import subscene.datnt.com.subscene.utils.FileUtil;
 import subscene.datnt.com.subscene.widget.FilePickerBottomSheet;
 
-public class SubtitleDownloadActivity extends AppCompatActivity implements FilePickerBottomSheet.FilePickerListener {
+import static subscene.datnt.com.subscene.utils.Globals.APP_FOLDER;
+
+public class SubtitleDownloadActivity extends AppCompatActivity implements FilePickerBottomSheet.FilePickerListener,OnSceneListener {
     private Subtitle subtitle;
     private Film film;
+    private PopularFilm popularFilm;
     private LinearLayout subDetail;
     private Context mThis;
     private ImageView imgPoster;
@@ -77,14 +84,20 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
     private BottomSheetBehavior bottomSheetBehavior;
     private RelativeLayout layoutContent;
     private ProgressBar progressBar;
+    private ScrollView scrollView;
+    private Subscene subscene;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mThis = this;
         setContentView(R.layout.activity_subtitle_download);
-        subtitle = (Subtitle) getIntent().getSerializableExtra("Subtitle");
-        film = (Film) getIntent().getSerializableExtra("Film");
+        if (getIntent().hasExtra("PopularFilm")){
+            popularFilm = (PopularFilm) getIntent().getSerializableExtra("PopularFilm");
+        }else{
+            subtitle = (Subtitle) getIntent().getSerializableExtra("Subtitle");
+            film = (Film) getIntent().getSerializableExtra("Film");
+        }
         layoutContent = findViewById(R.id.layout_content);
         progressBar = findViewById(R.id.progressBar);
         imgPoster = findViewById(R.id.img_poster);
@@ -97,12 +110,14 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
                 .considerExifParams(true)
                 .bitmapConfig(Bitmap.Config.RGB_565)
                 .build();
-        ImageLoader.getInstance().displayImage(subtitle.getPoster(), imgPoster, options, new
-                SimpleImageLoadingListener());
+
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(film.getName());
+            if (film != null)
+                getSupportActionBar().setTitle(film.getName());
+            else
+                getSupportActionBar().setTitle(popularFilm.getName());
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
@@ -115,8 +130,12 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
             }
         });
         cardView = findViewById(R.id.card_view);
-        new SubDetailAsyn().execute(subtitle.getLink());
-
+        scrollView = findViewById(R.id.scroll);
+        subscene = new Subscene(this);
+        if (subtitle != null)
+            subscene.getLinkDownloadSubtitle(subtitle.getLink());
+        else
+            subscene.getLinkDownloadSubtitle(popularFilm.getUrl());
         initLayoutMigrateSub();
     }
 
@@ -158,74 +177,23 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
         }
     }
 
-    @Override
-    public void onCopy(String fileName, File path) {
-        if (extractFile.size() == 1) {
-            String extension = FilenameUtils.getExtension(extractFile.get(0).getAbsolutePath());
-            FileUtil.move(fileName + "." + extension, extractFile.get(0), path);
-        }
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-    }
-
-    @Override
-    public void onCancelCopy() {
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-    }
-
-    private class SubDetailAsyn extends AsyncTask<String, Void, ArrayList<SubtitleDetail>> {
-
-        @Override
-        protected ArrayList<SubtitleDetail> doInBackground(String... strings) {
-            Document document = null;
-            ArrayList<SubtitleDetail> subDetails = new ArrayList<>();
-            try {
-                document = (Document) Jsoup.connect(strings[0]).get();
-                if (document != null) {
-                    //Get link download
-                    Elements download = document.select("div.download");
-                    linkDownload = download.select("a").attr("href");
-                    //Get detail
-                    Elements windows = document.select("div.details > div.window");
-                    if (windows.size() > 0) {
-                        for (Element window : windows) {
-                            String attribute = window.attr("id");
-                            if (attribute.equals("details")) {
-                                Elements details = windows.select("ul > li");
-                                String content = "";
-                                for (Element detail : details) {
-                                    content += detail.html() + "<br>";
-                                }
-                                subDetails.add(new SubtitleDetail(attribute, content));
-                            } else if (attribute.equals("preview")) {
-                                String details = windows.select("p").html();
-                                subDetails.add(new SubtitleDetail(attribute, details));
-                            }
-                        }
-                    }
-
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return subDetails;
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<SubtitleDetail> subtitleDetails) {
-            super.onPostExecute(subtitleDetails);
-            layoutContent.setVisibility(View.VISIBLE);
-            progressBar.setVisibility(View.GONE);
-            arraySubDetail = subtitleDetails;
-            for (SubtitleDetail detail : subtitleDetails) {
-                if (detail.getId().equals("details")) {
-                    TextView text = new TextView(mThis);
-                    text.setText(getSpannedText(detail.getContent()));
-                    subDetail.addView(text);
-                    currentHeight = getMeasureOfView(cardView);
-                }
+    private void updateView(String poster, String linkDownload, String detail, String preview) {
+        if (subtitle != null)
+            poster = subtitle.getPoster();
+        ImageLoader.getInstance().displayImage(poster, imgPoster, options, new SimpleImageLoadingListener());
+        layoutContent.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.GONE);
+        arraySubDetail.add(new SubtitleDetail("details", detail));
+        arraySubDetail.add(new SubtitleDetail("preview", preview));
+        for (SubtitleDetail d : arraySubDetail) {
+            if (d.getId().equals("details")) {
+                TextView text = new TextView(mThis);
+                text.setText(getSpannedText(d.getContent()));
+                subDetail.addView(text);
+                currentHeight = getMeasureOfView(cardView);
             }
         }
+        this.linkDownload = linkDownload;
     }
 
     private void UpdateDetailSub(String status) {
@@ -247,6 +215,7 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
             subDetail.addView(text);
             newHeight = getMeasureOfView(cardView);
         }
+        final int[] current = {currentHeight};
         ValueAnimator mAnimator = ValueAnimator.ofFloat(currentHeight, newHeight);
         mAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -255,12 +224,15 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
                 int x = fraction.intValue();
                 cardView.getLayoutParams().height = x;
                 cardView.requestLayout();
+                scrollView.smoothScrollTo(current[0], x);
+                current[0] = x;
             }
         });
 
-        mAnimator.setDuration(500);
+        mAnimator.setDuration(300);
         mAnimator.start();
         currentHeight = newHeight;
+
     }
 
     public static int getMeasureOfView(final View view) {
@@ -274,6 +246,40 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
         } else {
             return Html.fromHtml(text);
         }
+    }
+
+    @Override
+    public void onCopy(String fileName, File path) {
+        if (extractFile.size() == 1) {
+            String extension = FilenameUtils.getExtension(extractFile.get(0).getAbsolutePath());
+            FileUtil.move(fileName + "." + extension, extractFile.get(0), path);
+        }
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+    }
+
+    @Override
+    public void onCancelCopy() {
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+    }
+
+    @Override
+    public void onFoundFilm(String query, ArrayList<Film> films) {
+
+    }
+
+    @Override
+    public void onFoundLinkDownload(final String poster, final String linkDownload, final String detail, final String url) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                updateView(poster, linkDownload, detail, url);
+            }
+        });
+    }
+
+    @Override
+    public void onFoundListSubtitle(ArrayList<Subtitle> listSubtitle) {
+
     }
 
     public void DownloadSubtitle(View view) {
@@ -340,7 +346,7 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
 
                 // download the file
                 input = connection.getInputStream();
-                output = new FileOutputStream("/sdcard/" + fileName);
+                output = new FileOutputStream(new File(APP_FOLDER , fileName));
 
                 byte data[] = new byte[4096];
                 long total = 0;
@@ -395,16 +401,14 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
                 Toast.makeText(mThis, "Download error: " + result, Toast.LENGTH_LONG).show();
             else {
                 Toast.makeText(mThis, fileName + " downloaded", Toast.LENGTH_SHORT).show();
-                String a = FileUtil.getFileExtension(fileName);
-                String b = FilenameUtils.getExtension(new File("/sdcard/" + fileName).getAbsolutePath());
-                if (FilenameUtils.getExtension(new File("/sdcard/" + fileName).getAbsolutePath()).equals("rar"))
-                    extractFile = Decompress.extractArchive(Environment.getExternalStorageDirectory().toString() + "/" + fileName, Environment.getExternalStorageDirectory().toString());
-                else
+                if (FilenameUtils.getExtension(new File(APP_FOLDER, fileName).getAbsolutePath()).equals("rar"))
+                    extractFile = Decompress.extractArchive(APP_FOLDER+ "/" + fileName, APP_FOLDER);
                     try {
-                        extractFile = Decompress.unzip(Environment.getExternalStorageDirectory().toString() + "/" + fileName, Environment.getExternalStorageDirectory().toString());
+                        extractFile = Decompress.unzip(APP_FOLDER+ "/" + fileName, APP_FOLDER);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                new File(APP_FOLDER, fileName).delete();
                 moveSubtitleToVideoFolder();
             }
 
@@ -414,7 +418,7 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
 
     private void moveSubtitleToVideoFolder() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("AppCompatDialog");
+        builder.setTitle("");
         builder.setMessage("Do you want to move this subtitle to folder of compatible video?");
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override

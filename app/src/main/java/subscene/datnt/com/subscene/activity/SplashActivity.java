@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,6 +18,7 @@ import subscene.datnt.com.subscene.utils.PermissionUtils;
 import subscene.datnt.com.subscene.utils.SharePreference;
 
 import static android.support.v4.content.PermissionChecker.PERMISSION_GRANTED;
+import static subscene.datnt.com.subscene.utils.Globals.APP_FOLDER;
 
 public class SplashActivity extends AppCompatActivity implements GetLanguagesAsynTask.OnGetLanguageListener {
     private SharePreference preference;
@@ -32,6 +34,10 @@ public class SplashActivity extends AppCompatActivity implements GetLanguagesAsy
     }
 
     private void initComponents() {
+        File path = new File(APP_FOLDER);
+        if (!path.exists()) {
+            path.mkdirs();
+        }
         if (preference.getLanguage().size() > 0)
             new Handler().postDelayed(new Runnable() {
                 @Override

@@ -33,7 +33,6 @@ public class FileHierarchyAdapter extends RecyclerView.Adapter<RecyclerView.View
     public FileHierarchyAdapter(Context mContext, File root) {
         this.mContext = mContext;
         mListFile.add(root);
-        String a = root.getName();
         while (!root.getName().equals("sdcard")){
             mListFile.add(0,root.getParentFile());
             root = root.getParentFile();

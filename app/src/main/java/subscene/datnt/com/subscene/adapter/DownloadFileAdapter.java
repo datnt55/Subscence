@@ -15,34 +15,34 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import java.io.File;
 import java.util.ArrayList;
 
-import subscene.datnt.com.subscene.listener.OnItemClickListener;
 import subscene.datnt.com.subscene.R;
+import subscene.datnt.com.subscene.listener.OnItemClickListener;
 import subscene.datnt.com.subscene.utils.CommonUtils;
 
 /**
  * Adapter for detail of a recent call
  */
-public class LocalFileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class DownloadFileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final Context mContext;
     private final ArrayList<File> mListFile;
     private DisplayImageOptions options;
-    private OnItemClickListener listener;
+    private OnDownloadedFileClickListener listener;
 
-    public LocalFileAdapter(Context mContext, ArrayList<File> mListFile) {
+    public DownloadFileAdapter(Context mContext, ArrayList<File> mListFile) {
         this.mContext = mContext;
         this.mListFile = mListFile;
 
     }
 
-    public void setOnItemClickListener(OnItemClickListener listener){
+    public void setOnItemClickListener(OnDownloadedFileClickListener listener){
         this.listener = listener;
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_local_file, parent, false);
+                .inflate(R.layout.item_file_downloaded, parent, false);
         return new SubtitleViewHolder(view);
     }
 
@@ -51,13 +51,18 @@ public class LocalFileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         final SubtitleViewHolder mHolder = (SubtitleViewHolder) holder;
         mHolder.fileName.setText(mListFile.get(position).getName());
         mHolder.path.setText(mListFile.get(position).getParent());
-        mHolder.imgType.setImageResource(CommonUtils.getVideoIcon(getFileExtension(mListFile.get(position).getName())));
-        mHolder.root.setOnClickListener(new View.OnClickListener() {
+        mHolder.txtMoveToVideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (listener != null){
-                    listener.onItemClick(position);
-                }
+                if (listener != null)
+                    listener.onFileMove(position);
+            }
+        });
+        mHolder.txtDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (listener != null)
+                    listener.onFileDelete(position);
             }
         });
     }
@@ -80,16 +85,20 @@ public class LocalFileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         private final TextView fileName;
         private final TextView path;
         private final RelativeLayout root;
-        private final LinearLayout bgItem;
-        private final ImageView imgType;
+        private final TextView txtMoveToVideo;
+        private final TextView txtDelete;
         SubtitleViewHolder(View itemView) {
             super(itemView);
-            fileName = (TextView) itemView.findViewById(R.id.txt_file);
+            fileName = (TextView) itemView.findViewById(R.id.txt_file_name);
             path = (TextView) itemView.findViewById(R.id.txt_path);
             root =  itemView.findViewById(R.id.root);
-            bgItem =  itemView.findViewById(R.id.bg_item);
-            imgType = itemView.findViewById(R.id.img_type);
+            txtMoveToVideo =  itemView.findViewById(R.id.txt_move_to_video);
+            txtDelete = itemView.findViewById(R.id.txt_delete);
         }
     }
 
+    public interface OnDownloadedFileClickListener{
+        void onFileMove(int position);
+        void onFileDelete(int position);
+    }
 }

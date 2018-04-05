@@ -55,6 +55,13 @@ public class PopularFilmAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         mHolder.txtName.setText(mListFile.get(position).getName());
         mHolder.txtDate.setText(mListFile.get(position).getDate());
         mHolder.txtDownload.setText(mListFile.get(position).getDownload()+ " downloads");
+        mHolder.root.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (listener != null)
+                    listener.onItemClick(position);
+            }
+        });
     }
 
     public String getFileExtension(String fileName) {

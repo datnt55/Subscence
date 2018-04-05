@@ -24,6 +24,7 @@
         <activity android:name=".activity.MainActivity" />
         <activity android:name=".activity.SubDetailActivity" />
         <activity android:name=".activity.SubtitleDownloadActivity" />
+        <activity android:name=".activity.ListSearchResultActivity"></activity>
     </application>
 
 </manifest>

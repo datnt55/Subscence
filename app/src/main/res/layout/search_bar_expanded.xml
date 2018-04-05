@@ -33,7 +33,7 @@
             android:layout_weight="1"
             android:background="@null"
             android:fontFamily="sans-serif"
-            android:imeOptions="flagNoExtractUi"
+            android:imeOptions="actionSearch"
             android:inputType="textFilter"
             android:labelFor="@+id/search_view"
             android:maxLines="1"
