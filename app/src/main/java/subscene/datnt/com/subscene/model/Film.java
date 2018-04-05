@@ -34,7 +34,7 @@ public class Film implements Serializable{
     }
 
     public String getUrl() {
-        return "https://subscene.com"+url;
+        return url;
     }
 
     public void setUrl(String url) {

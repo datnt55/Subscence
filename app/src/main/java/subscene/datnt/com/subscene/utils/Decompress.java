@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -23,7 +24,7 @@ import subscene.datnt.com.unrar.rarfile.FileHeader;
 public class Decompress {
     public static String TAG = "Subscene";
 
-    public static void extractArchive(String archive, String destination) {
+    public static  ArrayList<File>  extractArchive(String archive, String destination) {
         if (archive == null || destination == null) {
             throw new RuntimeException("archive and destination must me set");
         }
@@ -37,7 +38,7 @@ public class Decompress {
                     "the destination must exist and point to a directory: "
                             + destination);
         }
-        extractArchive(arch, dest);
+        return extractArchive(arch, dest);
     }
 
     public static void main(String[] args) {
@@ -49,7 +50,8 @@ public class Decompress {
         }
     }
 
-    public static void extractArchive(File archive, File destination) {
+    public static ArrayList<File> extractArchive(File archive, File destination) {
+        ArrayList<File> unrarFile = new ArrayList<>();
         Archive arch = null;
         try {
             arch = new Archive(archive);
@@ -61,7 +63,7 @@ public class Decompress {
         if (arch != null) {
             if (arch.isEncrypted()) {
                 //logger.warn("archive is encrypted cannot extreact");
-                return;
+                return new ArrayList<>();
             }
             FileHeader fh = null;
             while (true) {
@@ -82,6 +84,7 @@ public class Decompress {
                         OutputStream stream = new FileOutputStream(f);
                         arch.extractFile(fh, stream);
                         stream.close();
+                        unrarFile.add(f);
                     }
                 } catch (IOException e) {
                     Log.e(TAG, "error extracting the file", e);
@@ -90,6 +93,7 @@ public class Decompress {
                 }
             }
         }
+        return unrarFile;
     }
 
     private static File createFile(FileHeader fh, File destination) {
@@ -163,7 +167,8 @@ public class Decompress {
 
     }
 
-    public static void unzip(String zipFile, String targetDirectory) throws IOException {
+    public static ArrayList<File> unzip(String zipFile, String targetDirectory) throws IOException {
+        ArrayList<File> unzipFile = new ArrayList<>();
         File arch = new File(zipFile);
         if (!arch.exists()) {
             throw new RuntimeException("the archive does not exit: " + zipFile);
@@ -192,6 +197,7 @@ public class Decompress {
                 try {
                     while ((count = zis.read(buffer)) != -1)
                         fout.write(buffer, 0, count);
+                    unzipFile.add(file);
                 } catch (IOException ex) {
 
                 } finally {
@@ -208,5 +214,6 @@ public class Decompress {
         } finally {
             zis.close();
         }
+        return unzipFile;
     }
 }

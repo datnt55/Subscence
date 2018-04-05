@@ -1,7 +1,6 @@
 package subscene.datnt.com.subscene.thread;
 
 import android.os.AsyncTask;
-import android.view.View;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -11,10 +10,7 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import subscene.datnt.com.subscene.activity.SearchFragment;
-import subscene.datnt.com.subscene.adapter.FilmAdapter;
 import subscene.datnt.com.subscene.model.Film;
-import subscene.datnt.com.subscene.utils.Globals;
 
 /**
  * Created by DatNT on 3/30/2018.

@@ -9,11 +9,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
+import subscene.datnt.com.subscene.utils.CommonUtils;
+
 /**
  * Created by DatNT on 3/26/2018.
  */
 
-public class DividerDecoration extends RecyclerView.ItemDecoration {
+public class MarginDividerDecoration extends RecyclerView.ItemDecoration {
 
     private static final int[] ATTRS = new int[]{
             android.R.attr.listDivider
@@ -25,7 +27,9 @@ public class DividerDecoration extends RecyclerView.ItemDecoration {
 
     private Drawable mDivider;
 
-    public DividerDecoration(Context context) {
+    private Context context;
+    public MarginDividerDecoration(Context context) {
+        this.context = context;
         final TypedArray a = context.obtainStyledAttributes(ATTRS);
         mDivider = a.getDrawable(0);
         a.recycle();
@@ -36,7 +40,7 @@ public class DividerDecoration extends RecyclerView.ItemDecoration {
         try {
             layoutManager = (LinearLayoutManager) parent.getLayoutManager();
         } catch (ClassCastException e) {
-            throw new IllegalStateException("DividerDecoration can only be used with a " +
+            throw new IllegalStateException("MarginDividerDecoration can only be used with a " +
                     "LinearLayoutManager.", e);
         }
         return layoutManager.getOrientation();
@@ -54,7 +58,7 @@ public class DividerDecoration extends RecyclerView.ItemDecoration {
     }
 
     public void drawVertical(Canvas c, RecyclerView parent) {
-        final int left = parent.getPaddingLeft();
+        final int left = parent.getPaddingLeft()+ (int) CommonUtils.convertDpToPixel(50,context);
         final int right = parent.getWidth() - parent.getPaddingRight();
         final int recyclerViewTop = parent.getPaddingTop();
         final int recyclerViewBottom = parent.getHeight() - parent.getPaddingBottom();
@@ -80,7 +84,7 @@ public class DividerDecoration extends RecyclerView.ItemDecoration {
             final View child = parent.getChildAt(i);
             final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
                     .getLayoutParams();
-            final int left = Math.max(recyclerViewLeft, child.getRight() + params.rightMargin);
+            final int left = Math.max(recyclerViewLeft, child.getRight() + params.rightMargin) + (int) CommonUtils.convertDpToPixel(50,context);
             final int right = Math.min(recyclerViewRight, left + mDivider.getIntrinsicHeight());
             mDivider.setBounds(left, top, right, bottom);
             mDivider.draw(c);

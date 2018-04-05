@@ -14,21 +14,25 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
+import java.io.File;
+
+import subscene.datnt.com.subscene.thread.YifySubtitles;
 import subscene.datnt.com.subscene.utils.Globals;
 import subscene.datnt.com.subscene.R;
-import subscene.datnt.com.subscene.widget.CoordinatorLayoutBottomSheetBehavior;
 import subscene.datnt.com.subscene.widget.FilePickerBottomSheet;
 import subscene.datnt.com.subscene.widget.SearchEditTextLayout;
 import subscene.datnt.com.subscene.adapter.ViewPagerAdapter;
 import subscene.datnt.com.subscene.utils.CommonUtils;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity implements DownloadedFragment.OnDataPass, FilePickerBottomSheet.FilePickerListener {
     private String url = "https://subscene.com/subtitles/title?q=avenger&l=";
     //private RecyclerView listFilm;
     private Context mThis;
@@ -37,7 +41,7 @@ public class MainActivity extends AppCompatActivity{
     private EditText mSearchView;
     private boolean isInSearch;
     private String mSearchQuery;
-    private SearchFragment searchFragment;
+    private SearchHintFragment searchFragment;
     //private FilmHeadersAdapter adapter;
     private ProgressBar progressBar;
     private RelativeLayout layoutSearch;
@@ -49,7 +53,11 @@ public class MainActivity extends AppCompatActivity{
     };
     private PopularFragment popularFragment;
     private AutoDownloadFragment autoDownloadFragment;
+    private DownloadedFragment downloadedFragment;
+    private FilePickerBottomSheet mBottomSheet;
+    private BottomSheetBehavior bottomSheetBehavior;
     private RelativeLayout layoutShadow;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,16 +66,18 @@ public class MainActivity extends AppCompatActivity{
         mThis = this;
         progressBar = findViewById(R.id.progressBar);
         layoutSearch = findViewById(R.id.layout_search);
-       // listFilm = findViewById(R.id.list_film);
-        // Set layout manager
-        layoutShadow = findViewById(R.id.shadow);
-        int orientation = getLayoutManagerOrientation(getResources().getConfiguration().orientation);
-        final LinearLayoutManager layoutManager = new LinearLayoutManager(this, orientation, false);
         initSearchLayout();
         initViewPager();
-        final FilePickerBottomSheet mBottomSheet = findViewById(R.id.file_picker_bottom_sheet);
+        initBottomSheet();
+        YifySubtitles yifySubtitles = new YifySubtitles(null);
+        yifySubtitles.getMovieSubsByName("avenger","");
+    }
 
-        BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(mBottomSheet);
+    private void initBottomSheet() {
+        layoutShadow = findViewById(R.id.shadow);
+        mBottomSheet = findViewById(R.id.file_picker_bottom_sheet);
+        mBottomSheet.setOnFilePickerListener(this);
+        bottomSheetBehavior = BottomSheetBehavior.from(mBottomSheet);
         bottomSheetBehavior.setHideable(true);
         //bottomSheetBehavior.setPeekHeight(126);
         bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
@@ -83,10 +93,11 @@ public class MainActivity extends AppCompatActivity{
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                layoutShadow.setVisibility(View.VISIBLE);
-                layoutShadow.setAlpha(slideOffset);
+
             }
         });
+
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
 
     private void initViewPager() {
@@ -102,14 +113,17 @@ public class MainActivity extends AppCompatActivity{
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         popularFragment = new PopularFragment();
         autoDownloadFragment = new AutoDownloadFragment();
+        downloadedFragment = new DownloadedFragment();
 
         adapter.addFrag(popularFragment, "Popular Subtitle");
         adapter.addFrag(autoDownloadFragment, "Auto Download");
+        adapter.addFrag(downloadedFragment, "Downloaded");
         viewPager.setAdapter(adapter);
     }
     private void setupTabIcons() {
-        tabLayout.getTabAt(0).setIcon(tabIcons[0]);
-        tabLayout.getTabAt(1).setIcon(tabIcons[1]);
+        tabLayout.getTabAt(0).setText("Popular Subs");
+        tabLayout.getTabAt(1).setText("Auto Download");
+        tabLayout.getTabAt(2).setText("Downloaded");
 //        tabLayout.getTabAt(0).getIcon().setColorFilter(ContextCompat.getColor(mThis, R.color.blue_light), PorterDuff.Mode.SRC_IN);
 //        tabLayout.getTabAt(1).getIcon().setColorFilter(ContextCompat.getColor(mThis, R.color.grey_1), PorterDuff.Mode.SRC_IN);
 //        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -139,8 +153,21 @@ public class MainActivity extends AppCompatActivity{
         searchEditTextLayout.setOnClickListener(mSearchViewOnClickListener);
         searchEditTextLayout.setCallback(searchEditTextActionListener);
         mSearchView.addTextChangedListener(mPhoneSearchQueryTextListener);
+        mSearchView.setOnEditorActionListener(mPhoneSearchClickListener);
     }
 
+    private TextView.OnEditorActionListener mPhoneSearchClickListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                Intent intent = new Intent(mThis, ListSearchResultActivity.class);
+                intent.putExtra("Search",mSearchQuery);
+                startActivity(intent);
+                return true;
+            }
+            return false;
+        }
+    };
     // Action when click to components of search view
     private SearchEditTextLayout.Callback searchEditTextActionListener = new SearchEditTextLayout.Callback() {
         @Override
@@ -196,7 +223,7 @@ public class MainActivity extends AppCompatActivity{
             transaction.remove(searchFragment);
         }
         isInSearch = !smartDialSearch;
-        SearchFragment fragment = (SearchFragment) getFragmentManager().findFragmentByTag
+        SearchHintFragment fragment = (SearchHintFragment) getFragmentManager().findFragmentByTag
                 (Globals.TAG_REGULAR_SEARCH_FRAGMENT);
         if (animate) {
             transaction.setCustomAnimations(android.R.animator.fade_in, 0);
@@ -204,7 +231,7 @@ public class MainActivity extends AppCompatActivity{
             transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
         }
         if (fragment == null) {
-            fragment = new SearchFragment();
+            fragment = new SearchHintFragment();
             transaction.add(R.id.dialtacts_frame, fragment, Globals.TAG_REGULAR_SEARCH_FRAGMENT);
         } else {
             transaction.show(fragment);
@@ -220,6 +247,8 @@ public class MainActivity extends AppCompatActivity{
             popularFragment.getView().animate().alpha(0).withLayer();
         if (autoDownloadFragment.isVisible() && autoDownloadFragment.getView() != null && autoDownloadFragment.getView().animate() != null)
             autoDownloadFragment.getView().animate().alpha(0).withLayer();
+        if (downloadedFragment.isVisible() && downloadedFragment.getView() != null && downloadedFragment.getView().animate() != null)
+            downloadedFragment.getView().animate().alpha(0).withLayer();
     }
 
     private void showComponentWhenSearchViewHide() {
@@ -229,6 +258,8 @@ public class MainActivity extends AppCompatActivity{
             popularFragment.getView().animate().alpha(1).withLayer();
         if (autoDownloadFragment.isVisible() && autoDownloadFragment.getView() != null && autoDownloadFragment.getView().animate() != null)
             autoDownloadFragment.getView().animate().alpha(1).withLayer();
+        if (downloadedFragment.isVisible() && downloadedFragment.getView() != null && downloadedFragment.getView().animate() != null)
+            downloadedFragment.getView().animate().alpha(1).withLayer();
     }
 
     private int getLayoutManagerOrientation(int activityOrientation) {
@@ -241,8 +272,8 @@ public class MainActivity extends AppCompatActivity{
 
     @Override
     public void onAttachFragment(Fragment fragment) {
-        if (fragment instanceof SearchFragment) {
-            searchFragment = (SearchFragment) fragment;
+        if (fragment instanceof SearchHintFragment) {
+            searchFragment = (SearchHintFragment) fragment;
             //searchFragment.setOnScrollListener(this);
             //searchFragment.setOnCallListener(this);
         }
@@ -276,4 +307,31 @@ public class MainActivity extends AppCompatActivity{
     }
 
 
+    @Override
+    public void onDataPass(File file) {
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+    }
+
+    @Override
+    public void onCopy(String filename, File path) {
+
+    }
+
+    @Override
+    public void onCancelCopy() {
+
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
+                mBottomSheet.onBackPressed();
+                return true;
+            }
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
 }

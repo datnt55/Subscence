@@ -5,21 +5,21 @@ package subscene.datnt.com.subscene.model;
  */
 
 public class PopularFilm extends  Film {
-    private String language;
+    private String date;
     private String download;
 
-    public PopularFilm(String name, String url, String language, String download) {
+    public PopularFilm(String name, String url, String date, String download) {
         super(name, url);
-        this.language = language;
+        this.date = date;
         this.download = download;
     }
 
-    public String getLanguage() {
-        return language;
+    public String getDate() {
+        return date;
     }
 
-    public void setLanguage(String language) {
-        this.language = language;
+    public void setDate(String date) {
+        this.date = date;
     }
 
     public String getDownload() {

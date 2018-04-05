@@ -119,7 +119,7 @@ public class CommonUtils {
         }else if (name.toLowerCase().equals("kmv")){
             return R.drawable.kmv;
         }
-        return 0;
+        return R.drawable.file;
     }
 
     public static boolean isLollipopCompatible() {

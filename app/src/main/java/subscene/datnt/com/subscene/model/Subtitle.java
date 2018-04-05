@@ -21,6 +21,12 @@ public class Subtitle implements Serializable{
         this.year = year;
     }
 
+    public Subtitle(String title, String languague, String link) {
+        this.title = title;
+        this.languague = languague;
+        this.link = link;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -54,10 +60,15 @@ public class Subtitle implements Serializable{
     }
 
     public String getLink() {
-        return "https://subscene.com"+link ;
+        return link ;
     }
 
     public void setLink(String link) {
         this.link = link;
+    }
+
+    @Override
+    public String toString() {
+        return title + ","+languague+","+link;
     }
 }
