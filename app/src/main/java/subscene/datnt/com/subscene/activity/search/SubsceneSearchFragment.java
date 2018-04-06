@@ -14,7 +14,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import subscene.datnt.com.subscene.R;
-import subscene.datnt.com.subscene.adapter.FilmAdapter;
+import subscene.datnt.com.subscene.adapter.SubsceneFilmAdapter;
 import subscene.datnt.com.subscene.listener.OnItemClickListener;
 import subscene.datnt.com.subscene.listener.OnSceneListener;
 import subscene.datnt.com.subscene.model.Film;
@@ -25,7 +25,7 @@ public class SubsceneSearchFragment extends Fragment implements OnItemClickListe
     private String query;
     private RecyclerView listFilm;
     private ArrayList<Film> arrayFilms = new ArrayList<>();
-    private FilmAdapter adapter;
+    private SubsceneFilmAdapter adapter;
     private TextView txtNoFilm;
     private ProgressBar dialog;
     private Subscene subscene;
@@ -95,7 +95,7 @@ public class SubsceneSearchFragment extends Fragment implements OnItemClickListe
                     // listFilm.addItemDecoration(new MarginDividerDecoration(mThis));
                     listFilm.setVisibility(View.VISIBLE);
                     adapter = null;
-                    adapter = new FilmAdapter(arrayFilms, getActivity());
+                    adapter = new SubsceneFilmAdapter(arrayFilms, getActivity());
                     listFilm.setAdapter(adapter);
                     adapter.setOnItemClickListener(SubsceneSearchFragment.this);
                 }

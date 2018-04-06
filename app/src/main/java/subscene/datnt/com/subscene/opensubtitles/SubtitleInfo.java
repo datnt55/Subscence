@@ -23,12 +23,12 @@ import java.util.HashMap;
  */
 public class SubtitleInfo {
 
-    String IDSubMovieFile;
-    String MovieHash,MovieByteSize,MovieTimeMS,MovieFrames,IDSubtitleFile,SubFileName,SubActualCD,SubSize,SubHash;
-    String IDSubtitle,UserID,SubLanguageID,SubFormat,SubSumCD,SubAddDate,SubDownloadsCnt,SubBad,SubRating;
-    String IDMovie,IDMovieImdb,MovieName,MovieNameEng,MovieYear,MovieImdbRating,UserNickName,ISO639,LanguageName,SubDownloadLink;
+    private String IDSubMovieFile;
+    private String MovieHash,MovieByteSize,MovieTimeMS,MovieFrames,IDSubtitleFile,SubFileName,SubActualCD,SubSize,SubHash;
+    private String IDSubtitle,UserID,SubLanguageID,SubFormat,SubSumCD,SubAddDate,SubDownloadsCnt,SubBad,SubRating;
+    private String IDMovie,IDMovieImdb,MovieName,MovieNameEng,MovieYear,MovieImdbRating,UserNickName,ISO639,LanguageName,SubDownloadLink;
 
-    SubtitleInfo (HashMap<?, ?> info){
+    public SubtitleInfo(HashMap<?, ?> info){
         IDSubMovieFile= (String) info.get("IDSubMovieFile");
         MovieHash= (String) info.get("MovieHash");
         MovieByteSize=(String) info.get("MovieByteSize");

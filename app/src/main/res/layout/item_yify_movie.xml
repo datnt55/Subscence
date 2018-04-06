@@ -22,7 +22,7 @@
             android:layout_weight="1"
             app:srcCompat="@drawable/rounded_button" />
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/bg_item"
             android:layout_width="match_parent"
             android:layout_height="80dp"
@@ -37,7 +37,6 @@
                 android:id="@+id/txt_movie"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
                 android:text="TextView"
                 android:textStyle="bold"
                 android:textColor="#000"
@@ -48,15 +47,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:layout_below="@+id/txt_movie"
                 android:ellipsize="end"
+                android:lines="1"
                 android:textSize="13sp"
                 android:text="TextView" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:layout_gravity="bottom"
+                android:layout_alignParentBottom="true"
                 android:orientation="horizontal">
 
                 <TextView
@@ -74,6 +75,6 @@
                     android:textSize="13sp"
                     android:text="TextView" />
             </RelativeLayout>
-        </LinearLayout>
+        </RelativeLayout>
     </RelativeLayout>
 </android.support.v7.widget.CardView>

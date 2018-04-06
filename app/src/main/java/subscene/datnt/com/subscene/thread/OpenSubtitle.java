@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package subscene.datnt.com.subscene.opensubtitles;
+package subscene.datnt.com.subscene.thread;
+
+import android.os.Handler;
+import android.os.HandlerThread;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
@@ -36,11 +39,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import subscene.datnt.com.subscene.listener.OnSceneListener;
+import subscene.datnt.com.subscene.model.Film;
+import subscene.datnt.com.subscene.opensubtitles.OpenSubtitleHasher;
+import subscene.datnt.com.subscene.opensubtitles.SubtitleInfo;
+
 
 /**
  * Created by sachin on 7/4/16.
  */
-public class OpenSubtitle {
+public class OpenSubtitle extends SubServer{
     private static String OPEN_SUBTITLES_SERVER="http://api.opensubtitles.org/xml-rpc";
     private static String MOVIE_EXTENSIONS="mp4,mkv,avi,mov";
 
@@ -51,9 +59,16 @@ public class OpenSubtitle {
     File movie;
     FilenameFilter fileNameFilter;
     ArrayList movieFileExtensions;
+    private final Handler handler;
+    private static final String TAG = "OpenSubtitle";
+    private OnSceneListener listener;
 
+    public OpenSubtitle(OnSceneListener listener){
+        this.listener = listener;
+        final HandlerThread handlerThread = new HandlerThread(TAG);
+        handlerThread.start();
+        handler = new Handler(handlerThread.getLooper());
 
-    public OpenSubtitle(){
         xmlRpcClientConfig=new XmlRpcClientConfigImpl();
         xmlRpcClient=new XmlRpcClient();
         movieFileExtensions=new ArrayList();
@@ -101,9 +116,10 @@ public class OpenSubtitle {
         return infos;
     }
 
-    public List<SubtitleInfo> getMovieSubsByName(String moviename, String limit, String language) throws XmlRpcException {
+    public void getMovieSubsByName(String moviename, String limit, String language) throws XmlRpcException {
 
         List<SubtitleInfo> infos=new ArrayList<>();
+        ArrayList<Film> films=new ArrayList<>();
         HashMap<?,?> retVal;
         List params=new ArrayList();
         params.add(strToken);
@@ -111,7 +127,7 @@ public class OpenSubtitle {
         query.put("query",moviename);
         query.put("sublanguageid",language);
         HashMap<String,Object> query2=new HashMap<>();
-        query2.put("limit", limit);
+        //query2.put("limit", limit);
         Object[] paramsArray = new Object[]{strToken, new Object[]{query},query2};
         retVal=(HashMap)xmlRpcClient.execute("SearchSubtitles", paramsArray);
         System.out.println("Status code is "+retVal.get("status"));
@@ -132,10 +148,20 @@ public class OpenSubtitle {
                 System.out.println("Actual CD name "+info.getSubActualCD());
                 System.out.println("Bad is "+info.getSubBad());
                 infos.add(info);
+                boolean isExist = false;
+                for (Film film : films)
+                    if (film.getName().equals(info.getMovieName())) {
+                        isExist = true;
+                        break;
+                    }
+                if (!isExist)
+                    films.add(new Film(info.getMovieName(),""));
             }
         }
         System.out.println("Total subs length is " + ((Object[]) retVal.get("data")).length);
-        return infos;
+        //return infos;
+        if (listener != null)
+            listener.onFoundFilm(moviename,films);
     }
 
     public List<SubtitleInfo> getTvSeriesSubs(String TvseriesName, String season, String episode, String limit, String language) throws XmlRpcException {
@@ -158,7 +184,7 @@ public class OpenSubtitle {
             Object[] data=(Object[])retVal.get("data");
             for (int i=0;i<data.length;i++) {
                 SubtitleInfo info=new SubtitleInfo((HashMap<?, ?>) data[i]);
-                System.out.println("Id is "+info.IDMovieImdb);
+                System.out.println("Id is "+info.getIDMovieImdb());
                 System.out.println("title is "+info.getMovieName());
                 System.out.println(info.getSubDownloadLink());
                 infos.add(info);
@@ -236,7 +262,7 @@ public class OpenSubtitle {
     public void computeHash(String filePath){
         try {
             movie=new File(filePath);
-            fileHash=OpenSubtitleHasher.computeHash(movie);
+            fileHash= OpenSubtitleHasher.computeHash(movie);
             System.out.println(fileHash);
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -362,6 +388,33 @@ public class OpenSubtitle {
 
 
 
+
+    }
+
+    @Override
+    public void getMovieSubsByName(final String moviename, String language) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    login();
+                    ServerInfo();
+                    getMovieSubsByName(moviename,"50","");
+                    logOut();
+                } catch (XmlRpcException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void getLinkDownloadSubtitle(String url) {
+
+    }
+
+    @Override
+    public void searchSubsFromMovieName(String url, String language) {
 
     }
 //

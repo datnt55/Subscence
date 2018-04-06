@@ -14,21 +14,23 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import subscene.datnt.com.subscene.R;
+import subscene.datnt.com.subscene.adapter.OpenSubtitleFilmAdapter;
 import subscene.datnt.com.subscene.adapter.YiFyMovieAdapter;
 import subscene.datnt.com.subscene.listener.OnItemClickListener;
 import subscene.datnt.com.subscene.listener.OnSceneListener;
 import subscene.datnt.com.subscene.model.Film;
 import subscene.datnt.com.subscene.model.Subtitle;
+import subscene.datnt.com.subscene.thread.OpenSubtitle;
 import subscene.datnt.com.subscene.thread.YifySubtitles;
 
 public class OpenSubtitlesFragment extends Fragment implements OnItemClickListener, OnSceneListener {
     private String query;
     private RecyclerView listFilm;
     private ArrayList<Film> arrayFilms = new ArrayList<>();
-    private YiFyMovieAdapter adapter;
+    private OpenSubtitleFilmAdapter adapter;
     private TextView txtNoFilm;
     private ProgressBar dialog;
-    private YifySubtitles yifySubtitles;
+    private OpenSubtitle openSubtitle;
 
     public OpenSubtitlesFragment() {
         // Required empty public constructor
@@ -58,8 +60,8 @@ public class OpenSubtitlesFragment extends Fragment implements OnItemClickListen
     }
 
     private void search() {
-        yifySubtitles = new YifySubtitles(this);
-        yifySubtitles.getMovieSubsByName(query,"");
+        openSubtitle = new OpenSubtitle(this);
+        openSubtitle.getMovieSubsByName(query,"");
     }
 
     @Override
@@ -75,7 +77,6 @@ public class OpenSubtitlesFragment extends Fragment implements OnItemClickListen
     @Override
     public void onItemClick(int position) {
         Film film = arrayFilms.get(position);
-        yifySubtitles.getLinkDownloadSubtitle(film.getUrl());
     }
 
     @Override
@@ -96,7 +97,7 @@ public class OpenSubtitlesFragment extends Fragment implements OnItemClickListen
                     // listFilm.addItemDecoration(new MarginDividerDecoration(mThis));
                     listFilm.setVisibility(View.VISIBLE);
                     adapter = null;
-                    adapter = new YiFyMovieAdapter(getActivity(), arrayFilms);
+                    adapter = new OpenSubtitleFilmAdapter(getActivity(), arrayFilms);
                     listFilm.setAdapter(adapter);
                     adapter.setOnItemClickListener(OpenSubtitlesFragment.this);
                 }

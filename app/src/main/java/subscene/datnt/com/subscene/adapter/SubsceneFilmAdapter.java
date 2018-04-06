@@ -23,7 +23,7 @@ import subscene.datnt.com.subscene.R;
 /**
  * Adapter holding a list of animal names of type String. Note that each item must be unique.
  */
-public class FilmAdapter extends SectionedRecyclerViewAdapter<RecyclerView.ViewHolder> {
+public class SubsceneFilmAdapter extends SectionedRecyclerViewAdapter<RecyclerView.ViewHolder> {
 
     private ArrayList<String> mSectionLetters;
     private ArrayList<Integer> mSectionIndices;
@@ -33,7 +33,7 @@ public class FilmAdapter extends SectionedRecyclerViewAdapter<RecyclerView.ViewH
 
     private static final int IS_FOOTER = 3;
 
-    public FilmAdapter(ArrayList<Film> films, Context mContext) {
+    public SubsceneFilmAdapter(ArrayList<Film> films, Context mContext) {
         this.mArrayFilm = films;
         getPointChangeHeader();
     }

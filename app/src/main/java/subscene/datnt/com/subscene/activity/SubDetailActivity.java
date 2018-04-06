@@ -27,6 +27,7 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 import java.util.ArrayList;
 
 import subscene.datnt.com.subscene.listener.OnSceneListener;
+import subscene.datnt.com.subscene.thread.SubServer;
 import subscene.datnt.com.subscene.thread.Subscene;
 import subscene.datnt.com.subscene.widget.DividerItemDecoration;
 import subscene.datnt.com.subscene.model.Film;
@@ -45,7 +46,7 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
     private Toolbar toolbar;
     private TextView txtTitle;
     private ProgressBar progressBar;
-    private Subscene subscene;
+    private SubServer subscene;
     private TextView txtNoSub;
     private NestedScrollView layoutContent;
 

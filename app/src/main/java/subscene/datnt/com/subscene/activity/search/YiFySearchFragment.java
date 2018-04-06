@@ -14,14 +14,11 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import subscene.datnt.com.subscene.R;
-import subscene.datnt.com.subscene.adapter.FilmAdapter;
 import subscene.datnt.com.subscene.adapter.YiFyMovieAdapter;
 import subscene.datnt.com.subscene.listener.OnItemClickListener;
 import subscene.datnt.com.subscene.listener.OnSceneListener;
 import subscene.datnt.com.subscene.model.Film;
 import subscene.datnt.com.subscene.model.Subtitle;
-import subscene.datnt.com.subscene.model.YiFyFilm;
-import subscene.datnt.com.subscene.thread.Subscene;
 import subscene.datnt.com.subscene.thread.YifySubtitles;
 
 public class YiFySearchFragment extends Fragment implements OnItemClickListener, OnSceneListener {
