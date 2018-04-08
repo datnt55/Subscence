@@ -15,7 +15,7 @@
 
 
         <ImageView
-            android:id="@+id/img_type"
+            android:id="@+id/img_post"
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:layout_margin="5dp"
@@ -26,7 +26,7 @@
             android:id="@+id/bg_item"
             android:layout_width="match_parent"
             android:layout_height="80dp"
-            android:layout_toRightOf="@+id/img_type"
+            android:layout_toRightOf="@+id/img_post"
             android:gravity="center_vertical"
             android:orientation="vertical"
             android:paddingLeft="5dp"

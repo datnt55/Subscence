@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import subscene.datnt.com.subscene.model.Film;
+import subscene.datnt.com.subscene.utils.ServerType;
+
+import static subscene.datnt.com.subscene.utils.ServerType.SUBSCENE;
 
 /**
  * Created by DatNT on 3/30/2018.
@@ -51,7 +54,7 @@ public class SeachFilmAsynTask extends AsyncTask<String, Void, ArrayList<Film>> 
                         String links = link.attr("href");
                         String name = link.text();
                         String subCount = element.select("div[class=subtle count]").text();
-                        Film article = new Film(name, links, subCount);
+                        Film article = new Film(SUBSCENE, name, links, subCount);
                         article.setType(type);
                         listArticle.add(article);
                     }

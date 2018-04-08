@@ -18,6 +18,9 @@ import subscene.datnt.com.subscene.listener.OnSceneListener;
 import subscene.datnt.com.subscene.model.Film;
 import subscene.datnt.com.subscene.model.Subtitle;
 import subscene.datnt.com.subscene.model.SubtitleDetail;
+import subscene.datnt.com.subscene.utils.ServerType;
+
+import static subscene.datnt.com.subscene.utils.ServerType.SUBSCENE;
 
 /**
  * Created by DatNT on 4/5/2018.
@@ -145,7 +148,7 @@ public class Subscene extends SubServer{
                         String links = link.attr("href");
                         String name = link.text();
                         String subCount = element.select("div[class=subtle count]").text();
-                        Film article = new Film(name, "https://subscene.com"+links, subCount);
+                        Film article = new Film(SUBSCENE, name, "https://subscene.com"+links, subCount);
                         article.setType(type);
                         listArticle.add(article);
                     }
@@ -173,7 +176,7 @@ public class Subscene extends SubServer{
                 poster = posterElement.select("a").attr("href");
                 //Get link download
                 Elements download = document.select("div.download");
-                linkDownload = download.select("a").attr("href");
+                linkDownload = "https://subscene.com"+ download.select("a").attr("href");
                 //Get detail
                 Elements windows = document.select("div.details > div.window");
                 if (windows.size() > 0) {
@@ -199,7 +202,7 @@ public class Subscene extends SubServer{
             listener.onFoundLinkDownload(poster, linkDownload,detail,preview);
     }
 
-
+    @Override
     public void release(){
         handler.post(new Runnable() {
             @Override

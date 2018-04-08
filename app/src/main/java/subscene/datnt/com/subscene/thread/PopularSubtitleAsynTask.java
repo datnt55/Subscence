@@ -29,6 +29,9 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import subscene.datnt.com.subscene.model.PopularFilm;
+import subscene.datnt.com.subscene.utils.ServerType;
+
+import static subscene.datnt.com.subscene.utils.ServerType.SUBSCENE;
 
 /**
  * Created by DatNT on 3/30/2018.
@@ -79,7 +82,7 @@ public class PopularSubtitleAsynTask extends AsyncTask<Void, Void, ArrayList<Pop
 
                             if (attribute.equals("a1")) {
                                 Element links = td.select("a").first();
-                                link = links.attr("href");
+                                link = "https://subscene.com"+links.attr("href");
                                 name = td.select("div.visited").text();
                             } else if (attribute.equals("a6")) {
                                 date = td.text();
@@ -87,7 +90,7 @@ public class PopularSubtitleAsynTask extends AsyncTask<Void, Void, ArrayList<Pop
                                 download = td.text();
                             }
                         }
-                        popularFilms.add(new PopularFilm(name, link, date, download));
+                        popularFilms.add(new PopularFilm(SUBSCENE, name, link, date, download));
                     }
                     return popularFilms;
                 }

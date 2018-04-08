@@ -57,9 +57,14 @@ import subscene.datnt.com.subscene.R;
 import subscene.datnt.com.subscene.model.PopularFilm;
 import subscene.datnt.com.subscene.model.Subtitle;
 import subscene.datnt.com.subscene.model.SubtitleDetail;
+import subscene.datnt.com.subscene.model.YiFyFilm;
+import subscene.datnt.com.subscene.thread.OpenSubtitle;
+import subscene.datnt.com.subscene.thread.SubServer;
 import subscene.datnt.com.subscene.thread.Subscene;
+import subscene.datnt.com.subscene.thread.YifySubtitles;
 import subscene.datnt.com.subscene.utils.Decompress;
 import subscene.datnt.com.subscene.utils.FileUtil;
+import subscene.datnt.com.subscene.utils.ServerType;
 import subscene.datnt.com.subscene.widget.FilePickerBottomSheet;
 
 import static subscene.datnt.com.subscene.utils.Globals.APP_FOLDER;
@@ -85,8 +90,8 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
     private RelativeLayout layoutContent;
     private ProgressBar progressBar;
     private ScrollView scrollView;
-    private Subscene subscene;
-
+    private SubServer subscene;
+    private TextView txtDescription;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,6 +104,7 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
             film = (Film) getIntent().getSerializableExtra("Film");
         }
         layoutContent = findViewById(R.id.layout_content);
+        txtDescription = findViewById(R.id.txt_filmname);
         progressBar = findViewById(R.id.progressBar);
         imgPoster = findViewById(R.id.img_poster);
         options = new DisplayImageOptions.Builder()
@@ -131,7 +137,14 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
         });
         cardView = findViewById(R.id.card_view);
         scrollView = findViewById(R.id.scroll);
-        subscene = new Subscene(this);
+        if (film.getServer() == ServerType.SUBSCENE)
+            subscene = new Subscene(this);
+        else if (film.getServer() == ServerType.YIFYSUBTITLE) {
+            subscene = new YifySubtitles(this);
+            YiFyFilm yiFyFilm = (YiFyFilm) film;
+            txtDescription.setText(yiFyFilm.getDescription());
+        } else if (film.getServer() == ServerType.OPENSUBTITLE)
+            subscene = new OpenSubtitle(this);
         if (subtitle != null)
             subscene.getLinkDownloadSubtitle(subtitle.getLink());
         else
@@ -188,7 +201,8 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
         for (SubtitleDetail d : arraySubDetail) {
             if (d.getId().equals("details")) {
                 TextView text = new TextView(mThis);
-                text.setText(getSpannedText(d.getContent()));
+                String content = d.getContent().equals("")?"No have details" : d.getContent();
+                text.setText(getSpannedText(content));
                 subDetail.addView(text);
                 currentHeight = getMeasureOfView(cardView);
             }
@@ -203,18 +217,14 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
         for (SubtitleDetail detail : arraySubDetail)
             if (detail.getId().equals(status)) {
                 TextView text = new TextView(mThis);
-                text.setText(getSpannedText(detail.getContent()));
+                String content = detail.getContent().equals("")?"No have "+status : detail.getContent();
+                text.setText(getSpannedText(content));
                 subDetail.addView(text);
                 isExist = true;
                 newHeight = getMeasureOfView(cardView);
 
             }
-        if (!isExist) {
-            TextView text = new TextView(mThis);
-            text.setText("No have " + status);
-            subDetail.addView(text);
-            newHeight = getMeasureOfView(cardView);
-        }
+
         final int[] current = {currentHeight};
         ValueAnimator mAnimator = ValueAnimator.ofFloat(currentHeight, newHeight);
         mAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -283,7 +293,7 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
     }
 
     public void DownloadSubtitle(View view) {
-        new DownloadFileFromURL().execute("https://subscene.com" + linkDownload);
+        new DownloadFileFromURL().execute(linkDownload);
     }
 
     public class DownloadFileFromURL extends AsyncTask<String, Integer, String> {

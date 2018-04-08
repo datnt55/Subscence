@@ -27,8 +27,11 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 import java.util.ArrayList;
 
 import subscene.datnt.com.subscene.listener.OnSceneListener;
+import subscene.datnt.com.subscene.thread.OpenSubtitle;
 import subscene.datnt.com.subscene.thread.SubServer;
 import subscene.datnt.com.subscene.thread.Subscene;
+import subscene.datnt.com.subscene.thread.YifySubtitles;
+import subscene.datnt.com.subscene.utils.ServerType;
 import subscene.datnt.com.subscene.widget.DividerItemDecoration;
 import subscene.datnt.com.subscene.model.Film;
 import subscene.datnt.com.subscene.listener.OnItemClickListener;
@@ -87,7 +90,12 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
         listSubtitle.setHasFixedSize(true);
         listSubtitle.setNestedScrollingEnabled(false);
         txtTitle = findViewById(R.id.txt_title);
-        subscene = new Subscene(this);
+        if (film.getServer() == ServerType.SUBSCENE)
+            subscene = new Subscene(this);
+        else if (film.getServer() == ServerType.YIFYSUBTITLE)
+            subscene = new YifySubtitles(this);
+        else if (film.getServer() == ServerType.OPENSUBTITLE)
+            subscene = new OpenSubtitle(this);
         subscene.searchSubsFromMovieName(film.getUrl(),"vietnamese");
 
     }

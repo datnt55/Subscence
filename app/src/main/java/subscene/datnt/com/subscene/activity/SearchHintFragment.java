@@ -9,8 +9,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.widget.RelativeLayout;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -31,8 +32,9 @@ public class SearchHintFragment extends Fragment implements OnItemClickListener,
     private ArrayList<MovieHint> arrayFilms = new ArrayList<>();
     private String stringQuery;
     private HintAdapter adapter;
-    private TextView txtNoFilm;
+    private RelativeLayout layoutNoFilm;
     private ProgressBar dialog;
+    private ImageView imgSearch;
 
     public SearchHintFragment() {
         // Required empty public constructor
@@ -54,8 +56,17 @@ public class SearchHintFragment extends Fragment implements OnItemClickListener,
 
     private void initComponents(View rootView) {
         listFilm = (RecyclerView) rootView.findViewById(R.id.list_film);
-        txtNoFilm = rootView.findViewById(R.id.txt_no_film);
+        layoutNoFilm = rootView.findViewById(R.id.layout_no_result);
         dialog = rootView.findViewById(R.id.progressBar);
+        imgSearch = rootView.findViewById(R.id.img_search);
+        imgSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), ListSearchResultActivity.class);
+                intent.putExtra("Search",stringQuery);
+                startActivity(intent);
+            }
+        });
         stringQuery = "";
         setupListFilm();
     }
@@ -71,7 +82,7 @@ public class SearchHintFragment extends Fragment implements OnItemClickListener,
 
     public void setOnQueryString(String query) {
         this.stringQuery = query;
-        txtNoFilm.setVisibility(View.GONE);
+        layoutNoFilm.setVisibility(View.GONE);
         listFilm.setVisibility(View.GONE);
         if (query.equals("")) {
             dialog.setVisibility(View.GONE);
@@ -111,11 +122,11 @@ public class SearchHintFragment extends Fragment implements OnItemClickListener,
                     return;
                 dialog.setVisibility(View.GONE);
                 if (listHint.size() == 0) {
-                    txtNoFilm.setVisibility(View.VISIBLE);
+                    layoutNoFilm.setVisibility(View.VISIBLE);
                     listFilm.setVisibility(View.GONE);
                     arrayFilms.clear();
                 } else {
-                    txtNoFilm.setVisibility(View.GONE);
+                    layoutNoFilm.setVisibility(View.GONE);
                     listFilm.setVisibility(View.VISIBLE);
                     arrayFilms = listHint;
                     // Add decoration for dividers between list items

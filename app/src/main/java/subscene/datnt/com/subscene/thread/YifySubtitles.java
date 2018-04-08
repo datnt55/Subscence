@@ -17,6 +17,8 @@ import subscene.datnt.com.subscene.model.Film;
 import subscene.datnt.com.subscene.model.Subtitle;
 import subscene.datnt.com.subscene.model.YiFyFilm;
 
+import static subscene.datnt.com.subscene.utils.ServerType.YIFYSUBTITLE;
+
 /**
  * Created by DatNT on 4/5/2018.
  */
@@ -38,6 +40,41 @@ public class YifySubtitles extends SubServer {
             @Override
             public void run() {
                 innerGetMovieSubsByName(movieName,language);
+            }
+        });
+    }
+    @Override
+    public void getLinkDownloadSubtitle(final String url) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                innerGetLinkDownloadSubtitle(url);
+            }
+        });
+    }
+
+    private void innerGetLinkDownloadSubtitle(String url) {
+        Document document = null;
+        try {
+            Log.e("TAG",url);
+            document = (Document) Jsoup.connect(url).get();
+            if (document != null) {
+                Element result = document.select("div.col-xs-12> a.btn-icon.download-subtitle").first();
+                String download = result.attr("href");
+                if (listener != null)
+                    listener.onFoundLinkDownload("",download,"","");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void searchSubsFromMovieName(final String url, final String language) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                innerSearchSubsFromMovieName(url, language);
             }
         });
     }
@@ -71,7 +108,7 @@ public class YifySubtitles extends SubServer {
                     Elements extraInfo = content.select("div.col-xs-12");
                     String actor = extraInfo.get(3).select("span").first().text();
                     String description = extraInfo.get(4).select("span").first().text();
-                    listFilm.add(new YiFyFilm(name,"https://www.yifysubtitles.com"+link, duration, year, actor, description));
+                    listFilm.add(new YiFyFilm(YIFYSUBTITLE, name,"https://www.yifysubtitles.com"+link, duration, year, actor, description,"https://"+poster));
                 }
             }
         } catch (IOException e) {
@@ -81,26 +118,18 @@ public class YifySubtitles extends SubServer {
             listener.onFoundFilm(movieName, listFilm);
     }
 
-    @Override
-    public void getLinkDownloadSubtitle(final String url) {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                innerGetLinkDownloadSubtitle(url);
-            }
-        });
-    }
-
-    private void innerGetLinkDownloadSubtitle(String url) {
+    private void innerSearchSubsFromMovieName(String url,String language) {
         Document document = null;
         ArrayList<Subtitle> listSub = new ArrayList<>();
         try {
             Log.e("TAG",url);
             document = (Document) Jsoup.connect(url).get();
             if (document != null) {
+                String year = document.select("div#circle-score-year").first().attr("data-text");
+                String poster = document.select("a.slide-item-wrap > img").first().attr("src");
                 Elements result = document.select("div.table-responsive> table > tbody > tr");
                 for (Element element : result){
-                    String language = "";;
+                    String lang = "";;
                     String name = "";;
                     String download = "";
                     Elements subs = element.select("td");
@@ -108,7 +137,7 @@ public class YifySubtitles extends SubServer {
                         String a = sub.attr("class");
                         Log.e("TD",a);
                         if (sub.attr("class").equals("flag-cell")){
-                            language = sub.select("span").get(1).text();
+                            lang = sub.select("span").get(1).text();
                         }else if (sub.attr("class").equals("download-cell")){
                             download = element.select("a").first().attr("href");
                         }else if (sub.attr("class").equals("")){
@@ -117,12 +146,10 @@ public class YifySubtitles extends SubServer {
                             name = sub.select("a").text().replaceAll(span,"");
                         }
                     }
-                    Log.e("TAG",new Subtitle(name,language,download).toString());
-                    listSub.add(new Subtitle(name,language,"https://www.yifysubtitles.com"+download));
+                    listSub.add(new Subtitle(name, lang, "https://"+poster,"https://www.yifysubtitles.com"+download, year));
                 }
                 if (listener != null)
                     listener.onFoundListSubtitle(listSub);
-                searchSubsFromMovieName(listSub.get(0).getLink(),"");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -130,20 +157,15 @@ public class YifySubtitles extends SubServer {
 
     }
 
+
+
     @Override
-    public void searchSubsFromMovieName(String url, String language) {
-        Document document = null;
-        try {
-            Log.e("TAG",url);
-            document = (Document) Jsoup.connect(url).get();
-            if (document != null) {
-                Element result = document.select("div.col-xs-12> a.btn-icon.download-subtitle").first();
-                String download = result.attr("href");
-                if (listener != null)
-                    listener.onFoundLinkDownload("",download,"","");
+    public void release() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                handler.getLooper().quit();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        });
     }
 }

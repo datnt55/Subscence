@@ -2,6 +2,8 @@ package subscene.datnt.com.subscene.model;
 
 import java.io.Serializable;
 
+import subscene.datnt.com.subscene.utils.ServerType;
+
 /**
  * Created by DatNT on 3/26/2018.
  */
@@ -11,15 +13,17 @@ public class Film implements Serializable{
     protected String url;
     protected String subCount;
     protected String type;
-
+    protected ServerType server;
     public Film() {
     }
-    public Film(String name, String url) {
+    public Film(ServerType server, String name, String url) {
+        this.server = server;
         this.name = name;
         this.url = url;
     }
 
-    public Film(String name, String url, String subCount) {
+    public Film(ServerType server,String name, String url, String subCount) {
+        this.server = server;
         this.name = name;
         this.url = url;
         this.subCount = subCount;
@@ -55,5 +59,13 @@ public class Film implements Serializable{
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public ServerType getServer() {
+        return server;
+    }
+
+    public void setServer(ServerType server) {
+        this.server = server;
     }
 }

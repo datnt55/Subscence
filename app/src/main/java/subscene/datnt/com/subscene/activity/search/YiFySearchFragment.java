@@ -1,6 +1,7 @@
 package subscene.datnt.com.subscene.activity.search;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,6 +15,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import subscene.datnt.com.subscene.R;
+import subscene.datnt.com.subscene.activity.SubDetailActivity;
+import subscene.datnt.com.subscene.activity.SubtitleDownloadActivity;
 import subscene.datnt.com.subscene.adapter.YiFyMovieAdapter;
 import subscene.datnt.com.subscene.listener.OnItemClickListener;
 import subscene.datnt.com.subscene.listener.OnSceneListener;
@@ -75,7 +78,10 @@ public class YiFySearchFragment extends Fragment implements OnItemClickListener,
     @Override
     public void onItemClick(int position) {
         Film film = arrayFilms.get(position);
-        yifySubtitles.getLinkDownloadSubtitle(film.getUrl());
+        Intent intent = new Intent(getActivity(), SubDetailActivity.class);
+        intent.putExtra("Film", film);
+        startActivity(intent);
+        //yifySubtitles.getLinkDownloadSubtitle(film.getUrl());
     }
 
     @Override

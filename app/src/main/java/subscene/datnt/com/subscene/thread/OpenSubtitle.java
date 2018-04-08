@@ -43,6 +43,9 @@ import subscene.datnt.com.subscene.listener.OnSceneListener;
 import subscene.datnt.com.subscene.model.Film;
 import subscene.datnt.com.subscene.opensubtitles.OpenSubtitleHasher;
 import subscene.datnt.com.subscene.opensubtitles.SubtitleInfo;
+import subscene.datnt.com.subscene.utils.ServerType;
+
+import static subscene.datnt.com.subscene.utils.ServerType.OPENSUBTITLE;
 
 
 /**
@@ -135,18 +138,18 @@ public class OpenSubtitle extends SubServer{
             Object[] data=(Object[])retVal.get("data");
             for (int i=0;i<data.length;i++) {
                 SubtitleInfo info=new SubtitleInfo((HashMap<?, ?>) data[i]);
-                System.out.println("Id is "+info.getIDMovieImdb());
-                System.out.println("title is "+info.getMovieName());
-                System.out.println("Link is "+info.getSubDownloadLink());
-                System.out.println("Language is "+info.getLanguageName());
-                System.out.println("IMDB rating is "+info.getMovieImdbRating());
-                System.out.println("Year is "+info.getMovieYear());
-                System.out.println("Sub file name "+info.getSubFileName());
-                System.out.println("Date is "+info.getSubAddDate());
-                System.out.println("Rating is "+info.getSubRating());
-                System.out.println("Downloads is "+info.getSubDownloadsCnt());
-                System.out.println("Actual CD name "+info.getSubActualCD());
-                System.out.println("Bad is "+info.getSubBad());
+//                System.out.println("Id is "+info.getIDMovieImdb());
+//                System.out.println("title is "+info.getMovieName());
+//                System.out.println("Link is "+info.getSubDownloadLink());
+//                System.out.println("Language is "+info.getLanguageName());
+//                System.out.println("IMDB rating is "+info.getMovieImdbRating());
+//                System.out.println("Year is "+info.getMovieYear());
+//                System.out.println("Sub file name "+info.getSubFileName());
+//                System.out.println("Date is "+info.getSubAddDate());
+//                System.out.println("Rating is "+info.getSubRating());
+//                System.out.println("Downloads is "+info.getSubDownloadsCnt());
+//                System.out.println("Actual CD name "+info.getSubActualCD());
+//                System.out.println("Bad is "+info.getSubBad());
                 infos.add(info);
                 boolean isExist = false;
                 for (Film film : films)
@@ -155,7 +158,7 @@ public class OpenSubtitle extends SubServer{
                         break;
                     }
                 if (!isExist)
-                    films.add(new Film(info.getMovieName(),""));
+                    films.add(new Film(OPENSUBTITLE, info.getMovieName(),""));
             }
         }
         System.out.println("Total subs length is " + ((Object[]) retVal.get("data")).length);
@@ -416,6 +419,16 @@ public class OpenSubtitle extends SubServer{
     @Override
     public void searchSubsFromMovieName(String url, String language) {
 
+    }
+
+    @Override
+    public void release() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                handler.getLooper().quit();
+            }
+        });
     }
 //
 //    public void searchAndDownloadDirectory(File dir){

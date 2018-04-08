@@ -5,12 +5,18 @@ package subscene.datnt.com.subscene.adapter;
  */
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 import java.util.ArrayList;
 
@@ -29,10 +35,20 @@ public class YiFyMovieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private final ArrayList<Film> mListFilm;
     private String query;
     private OnItemClickListener listener;
+    private DisplayImageOptions options;
 
     public YiFyMovieAdapter(Context mContext, ArrayList<Film> mListFile) {
         this.mContext = mContext;
         this.mListFilm = mListFile;
+        options = new DisplayImageOptions.Builder()
+                .showImageOnLoading(R.mipmap.ic_launcher)
+                .showImageForEmptyUri(R.mipmap.ic_launcher)
+                .showImageOnFail(R.mipmap.ic_launcher)
+                .cacheInMemory(true)
+                .cacheOnDisk(true)
+                .considerExifParams(true)
+                .bitmapConfig(Bitmap.Config.RGB_565)
+                .build();
 
     }
 
@@ -51,6 +67,7 @@ public class YiFyMovieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final HintViewHolder mHolder = (HintViewHolder) holder;
         YiFyFilm yiFyFilm = (YiFyFilm) mListFilm.get(position);
+        ImageLoader.getInstance().displayImage(yiFyFilm.getPoster(), mHolder.imgPoster, options, new SimpleImageLoadingListener());
         mHolder.txtMovie.setText(yiFyFilm.getName());
         mHolder.txtActor.setText(yiFyFilm.getActor());
         mHolder.txtYear.setText("Year "+yiFyFilm.getYear());
@@ -76,6 +93,7 @@ public class YiFyMovieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         private final TextView txtActor;
         private final TextView txtYear;
         private final TextView txtDuration;
+        private final ImageView imgPoster;
         private final RelativeLayout root;
         HintViewHolder(View itemView) {
             super(itemView);
@@ -83,6 +101,7 @@ public class YiFyMovieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             txtYear = itemView.findViewById(R.id.txt_year);
             txtActor = itemView.findViewById(R.id.txt_actor);
             txtDuration = itemView.findViewById(R.id.txt_duration);
+            imgPoster = itemView.findViewById(R.id.img_post);
             root =  itemView.findViewById(R.id.root);
         }
     }
