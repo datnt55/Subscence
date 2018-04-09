@@ -18,6 +18,7 @@ import java.util.ArrayList;
 
 import subscene.datnt.com.subscene.R;
 import subscene.datnt.com.subscene.listener.OnItemClickListener;
+import subscene.datnt.com.subscene.model.Film;
 import subscene.datnt.com.subscene.model.MovieHint;
 import subscene.datnt.com.subscene.utils.CommonUtils;
 
@@ -28,11 +29,11 @@ import subscene.datnt.com.subscene.utils.CommonUtils;
 public class HintAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final Context mContext;
-    private final ArrayList<MovieHint> mListHint;
+    private final ArrayList<Film> mListHint;
     private String query;
     private OnItemClickListener listener;
 
-    public HintAdapter(Context mContext, ArrayList<MovieHint> mListFile) {
+    public HintAdapter(Context mContext, ArrayList<Film> mListFile) {
         this.mContext = mContext;
         this.mListHint = mListFile;
 

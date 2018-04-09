@@ -41,6 +41,7 @@ import java.util.Map;
 
 import subscene.datnt.com.subscene.listener.OnSceneListener;
 import subscene.datnt.com.subscene.model.Film;
+import subscene.datnt.com.subscene.model.Subtitle;
 import subscene.datnt.com.subscene.opensubtitles.OpenSubtitleHasher;
 import subscene.datnt.com.subscene.opensubtitles.SubtitleInfo;
 import subscene.datnt.com.subscene.utils.ServerType;
@@ -123,6 +124,7 @@ public class OpenSubtitle extends SubServer{
 
         List<SubtitleInfo> infos=new ArrayList<>();
         ArrayList<Film> films=new ArrayList<>();
+        ArrayList<Subtitle> subtitles = new ArrayList<>();
         HashMap<?,?> retVal;
         List params=new ArrayList();
         params.add(strToken);
@@ -160,11 +162,27 @@ public class OpenSubtitle extends SubServer{
                 if (!isExist)
                     films.add(new Film(OPENSUBTITLE, info.getMovieName(),""));
             }
+            for (Film film : films) {
+                int count = 0;
+                for (int i = 0; i < data.length; i++) {
+                    SubtitleInfo info = new SubtitleInfo((HashMap<?, ?>) data[i]);
+                    if (film.getName().equals(info.getMovieName())) {
+                        Subtitle subtitle = new Subtitle(info.getMovieName(),info.getLanguageName(),"",info.getSubDownloadLink(),info.getMovieYear());
+                        subtitle.setFilm(film.getName());
+                        subtitles.add(subtitle);
+                        count++;
+                    }
+                }
+                film.setSubCount(count + " subtitles");
+            }
         }
+
         System.out.println("Total subs length is " + ((Object[]) retVal.get("data")).length);
         //return infos;
         if (listener != null)
             listener.onFoundFilm(moviename,films);
+        if (listener != null)
+            listener.onFoundListSubtitle(subtitles);
     }
 
     public List<SubtitleInfo> getTvSeriesSubs(String TvseriesName, String season, String episode, String limit, String language) throws XmlRpcException {
@@ -402,7 +420,7 @@ public class OpenSubtitle extends SubServer{
                 try {
                     login();
                     ServerInfo();
-                    getMovieSubsByName(moviename,"50","");
+                    getMovieSubsByName(moviename,"","");
                     logOut();
                 } catch (XmlRpcException e) {
                     e.printStackTrace();

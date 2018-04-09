@@ -15,7 +15,9 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import subscene.datnt.com.subscene.model.Film;
 import subscene.datnt.com.subscene.model.MovieHint;
+import subscene.datnt.com.subscene.utils.ServerType;
 
 /**
  * Created by DatNT on 4/5/2018.
@@ -43,7 +45,7 @@ public class HttpService {
     }
 
     public void innerGetHintData(String movie){
-        ArrayList<MovieHint> listHint = new ArrayList<>();
+        ArrayList<Film> listHint = new ArrayList<>();
         OkHttpClient.Builder builder = new OkHttpClient.Builder().connectTimeout(3000, TimeUnit.MILLISECONDS);
         OkHttpClient client = builder.build();
         HttpUrl.Builder httpBuider = HttpUrl.parse("https://www.yifysubtitles.com/ajax_search.php").newBuilder();
@@ -56,7 +58,7 @@ public class HttpService {
             JSONArray jsonArray = new JSONArray(jsonData);
             for (int i = 0 ; i < jsonArray.length(); i++){
                 JSONObject json = jsonArray.getJSONObject(i);
-                listHint.add(new MovieHint(json.getString("movie"),json.getString("imdb")));
+                listHint.add(new Film(ServerType.YIFYSUBTITLE, json.getString("movie"),"https://www.yifysubtitles.com/movie-imdb/"+json.getString("imdb")));
             }
             // Do something with the response.
         } catch (IOException e) {
@@ -70,6 +72,6 @@ public class HttpService {
     }
 
     public interface HttpResponseListener{
-        void onGetHint(String query, ArrayList<MovieHint> listHint);
+        void onGetHint(String query, ArrayList<Film> listHint);
     }
 }

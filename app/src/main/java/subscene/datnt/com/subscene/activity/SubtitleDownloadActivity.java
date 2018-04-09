@@ -137,18 +137,23 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
         });
         cardView = findViewById(R.id.card_view);
         scrollView = findViewById(R.id.scroll);
-        if (film.getServer() == ServerType.SUBSCENE)
+        ServerType serverType = film != null ? film.getServer() : popularFilm.getServer();
+        if (serverType == ServerType.SUBSCENE)
             subscene = new Subscene(this);
-        else if (film.getServer() == ServerType.YIFYSUBTITLE) {
+        else if (serverType == ServerType.YIFYSUBTITLE) {
             subscene = new YifySubtitles(this);
             YiFyFilm yiFyFilm = (YiFyFilm) film;
             txtDescription.setText(yiFyFilm.getDescription());
-        } else if (film.getServer() == ServerType.OPENSUBTITLE)
-            subscene = new OpenSubtitle(this);
-        if (subtitle != null)
-            subscene.getLinkDownloadSubtitle(subtitle.getLink());
-        else
-            subscene.getLinkDownloadSubtitle(popularFilm.getUrl());
+        } else if (serverType == ServerType.OPENSUBTITLE) {
+            //subscene = new OpenSubtitle(this);
+            updateView("",subtitle.getLink(),"","");
+        }
+        if (subscene != null) {
+            if (subtitle != null)
+                subscene.getLinkDownloadSubtitle(subtitle.getLink());
+            else
+                subscene.getLinkDownloadSubtitle(popularFilm.getUrl());
+        }
         initLayoutMigrateSub();
     }
 
@@ -413,12 +418,19 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
                 Toast.makeText(mThis, fileName + " downloaded", Toast.LENGTH_SHORT).show();
                 if (FilenameUtils.getExtension(new File(APP_FOLDER, fileName).getAbsolutePath()).equals("rar"))
                     extractFile = Decompress.extractArchive(APP_FOLDER+ "/" + fileName, APP_FOLDER);
+                else  if (FilenameUtils.getExtension(new File(APP_FOLDER, fileName).getAbsolutePath()).equals("zip"))
                     try {
                         extractFile = Decompress.unzip(APP_FOLDER+ "/" + fileName, APP_FOLDER);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                new File(APP_FOLDER, fileName).delete();
+                else  if (FilenameUtils.getExtension(new File(APP_FOLDER, fileName).getAbsolutePath()).equals("gz"))
+                    try {
+                        extractFile = Decompress.unGZip(APP_FOLDER+ "/" + fileName, APP_FOLDER);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+               // new File(APP_FOLDER, fileName).delete();
                 moveSubtitleToVideoFolder();
             }
 
@@ -441,6 +453,8 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.dismiss();
+                if (subscene != null)
+                    subscene.release();
                 Intent intent = new Intent(mThis, MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);

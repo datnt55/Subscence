@@ -39,7 +39,7 @@ public class OpenSubtitleFilmAdapter extends RecyclerView.Adapter<RecyclerView.V
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_open_subtitle_film, parent, false);
+                .inflate(R.layout.item_film, parent, false);
         return new OpenSubtitleViewHolder(view);
     }
 
@@ -47,12 +47,10 @@ public class OpenSubtitleFilmAdapter extends RecyclerView.Adapter<RecyclerView.V
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final OpenSubtitleViewHolder mHolder = (OpenSubtitleViewHolder) holder;
         mHolder.name.setText(mListFilm.get(position).getName());
-        mHolder.language.setText(mListFilm.get(position).getUrl());
+        mHolder.subCount.setText(mListFilm.get(position).getSubCount());
         mHolder.root.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (position == 0)
-                    return;
                 if (listener != null)
                     listener.onItemClick(position);
             }
@@ -70,11 +68,11 @@ public class OpenSubtitleFilmAdapter extends RecyclerView.Adapter<RecyclerView.V
 
         private final TextView name;
         private final LinearLayout root;
-        private final TextView language;
+        private final TextView subCount;
         OpenSubtitleViewHolder(View itemView) {
             super(itemView);
-            name = (TextView) itemView.findViewById(R.id.txt_movie);
-            language = (TextView) itemView.findViewById(R.id.txt_language);
+            name = (TextView) itemView.findViewById(R.id.txt_title);
+            subCount = (TextView) itemView.findViewById(R.id.txt_sub_count);
             root =  itemView.findViewById(R.id.root);
         }
     }

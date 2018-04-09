@@ -24,6 +24,7 @@
     <android.support.v4.widget.NestedScrollView
         android:id="@+id/content"
         android:layout_width="match_parent"
+        android:visibility="gone"
         android:layout_height="wrap_content"
         android:layout_marginTop="56dp">
 
@@ -51,7 +52,29 @@
                     android:layout_toRightOf="@+id/img_poster"
                     android:text=""
                     android:textColor="#000" />
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@+id/img_poster"
+                    android:layout_marginLeft="10dp"
+                    android:layout_below="@+id/txt_year">
 
+                    <Spinner
+                        android:id="@+id/spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@+id/textView5"/>
+
+                    <TextView
+                        android:id="@+id/textView5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:textStyle="bold"
+                        android:textColor="#000"
+                        android:layout_marginRight="5dp"
+                        android:text="Language" />
+                </RelativeLayout>
             </RelativeLayout>
 
             <TextView
@@ -71,6 +94,16 @@
                 android:layout_marginTop="10dp"
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp" />
+            <TextView
+                android:id="@+id/txt_no_sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:visibility="gone"
+                android:layout_marginTop="50dp"
+                android:text="There are no subtitles \n(maybe change your language filter)"
+                android:layout_gravity="center"/>
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
     <ProgressBar
@@ -79,13 +112,5 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"/>
-    <TextView
-        android:id="@+id/txt_no_sub"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="16sp"
-        android:visibility="gone"
-        android:text="There are no subtitles \n(maybe change your language filter)"
-        android:layout_gravity="center"/>
+
 </android.support.design.widget.CoordinatorLayout>

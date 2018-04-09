@@ -8,7 +8,7 @@
     android:layout_height="wrap_content">
 <LinearLayout
     android:layout_width="match_parent"
-    android:weightSum="2"
+    android:weightSum="5"
     android:id="@+id/bg_item"
     android:background="@color/colorPrimary"
     android:paddingTop="10dp"
@@ -21,7 +21,7 @@
     <TextView
         android:id="@+id/txt_language"
         android:layout_width="0dp"
-        android:layout_weight="1"
+        android:layout_weight="2"
         android:layout_height="wrap_content"
         android:textColor="#000"
         android:layout_gravity="center_vertical"
@@ -30,12 +30,13 @@
     <TextView
         android:id="@+id/txt_name"
         android:layout_width="0dp"
-        android:layout_weight="1"
+        android:layout_weight="3"
         android:layout_height="wrap_content"
-        android:maxLines="1"
         android:ellipsize="end"
+        android:singleLine="true"
+        android:scrollHorizontally="true"
         android:layout_gravity="center_vertical"
         android:textColor="#000"
-        android:text="TextView" />
+        android:text="nothing gonna change my love for you you on lie cajsn my lus ot udktt" />
 </LinearLayout>
 </LinearLayout>

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.os.Build;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
@@ -16,8 +17,11 @@ import android.text.Html;
 import android.text.Spanned;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -32,6 +36,7 @@ import subscene.datnt.com.subscene.thread.SubServer;
 import subscene.datnt.com.subscene.thread.Subscene;
 import subscene.datnt.com.subscene.thread.YifySubtitles;
 import subscene.datnt.com.subscene.utils.ServerType;
+import subscene.datnt.com.subscene.utils.SharePreference;
 import subscene.datnt.com.subscene.widget.DividerItemDecoration;
 import subscene.datnt.com.subscene.model.Film;
 import subscene.datnt.com.subscene.listener.OnItemClickListener;
@@ -39,7 +44,7 @@ import subscene.datnt.com.subscene.R;
 import subscene.datnt.com.subscene.model.Subtitle;
 import subscene.datnt.com.subscene.adapter.SubtitleAdapter;
 
-public class SubDetailActivity extends AppCompatActivity implements OnItemClickListener, OnSceneListener {
+public class SubDetailActivity extends AppCompatActivity implements OnItemClickListener, OnSceneListener,   AdapterView.OnItemSelectedListener {
     private Film film;
     private DisplayImageOptions options;
     private ImageView imgPoster;
@@ -52,8 +57,12 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
     private SubServer subscene;
     private TextView txtNoSub;
     private NestedScrollView layoutContent;
-
+    private Spinner spnLanguage;
+    private ArrayList<String> languages;
     private ArrayList<Subtitle> arraySubtitle = new ArrayList<>();
+    private ArrayList<Subtitle> arraySubtitleFilter = new ArrayList<>();
+    private SubtitleAdapter adapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,6 +84,7 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
         progressBar = findViewById(R.id.progressBar);
         toolbar = findViewById(R.id.toolbar);
         txtNoSub = findViewById(R.id.txt_no_sub);
+        spnLanguage = findViewById(R.id.spinner);
         layoutContent = findViewById(R.id.content);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -94,9 +104,17 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
             subscene = new Subscene(this);
         else if (film.getServer() == ServerType.YIFYSUBTITLE)
             subscene = new YifySubtitles(this);
-        else if (film.getServer() == ServerType.OPENSUBTITLE)
-            subscene = new OpenSubtitle(this);
-        subscene.searchSubsFromMovieName(film.getUrl(),"vietnamese");
+        else if (film.getServer() == ServerType.OPENSUBTITLE) {
+            arraySubtitle = (ArrayList<Subtitle>) getIntent().getSerializableExtra("Subtitle");
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    updateView(arraySubtitle);
+                }
+            },500);
+        }
+        if (subscene != null)
+            subscene.searchSubsFromMovieName(film.getUrl(),"");
 
     }
 
@@ -111,10 +129,11 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
     @Override
     public void onItemClick(int position) {
         Intent intent = new Intent(mThis, SubtitleDownloadActivity.class);
-        intent.putExtra("Subtitle", arraySubtitle.get(position));
+        intent.putExtra("Subtitle", arraySubtitleFilter.get(position));
         intent.putExtra("Film", film);
         startActivity(intent);
-        subscene.release();
+        if (subscene != null)
+            subscene.release();
     }
 
     @Override
@@ -157,13 +176,22 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
         txtNoSub.setVisibility(View.GONE);
         layoutContent.setVisibility(View.VISIBLE);
         arraySubtitle = subtitles;
-        arraySubtitle.add(0, new Subtitle("Release Name/Film title","Language","","",""));
-        ImageLoader.getInstance().displayImage(subtitles.get(1).getPoster(),imgPoster, options, new SimpleImageLoadingListener());
-        SubtitleAdapter adapter = new SubtitleAdapter(mThis, arraySubtitle);
+        for (Subtitle subtitle : arraySubtitle)
+            arraySubtitleFilter.add(subtitle);
+        arraySubtitleFilter.add(0, new Subtitle("Release Name/Film title","Language","","",""));
+        ImageLoader.getInstance().displayImage(subtitles.get(0).getPoster(),imgPoster, options, new SimpleImageLoadingListener());
+        adapter = new SubtitleAdapter(mThis, arraySubtitleFilter);
         listSubtitle.setAdapter(adapter);
-        txtYear.setText(getSpannedText(mThis.getResources().getString(R.string.film_year, subtitles.get(1).getYear())));
+        txtYear.setText(getSpannedText(mThis.getResources().getString(R.string.film_year, subtitles.get(0).getYear())));
         adapter.setOnItemClickListener(SubDetailActivity.this);
         txtTitle.setText("Subtitles for "+ film.getName());
+        languages = new SharePreference(this).getLanguage();
+        languages.add(0, "All");
+        spnLanguage.setOnItemSelectedListener(this);
+        ArrayAdapter aa = new ArrayAdapter(this,android.R.layout.simple_spinner_item,languages);
+        aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spnLanguage.setAdapter(aa);
+
     }
 
     private Spanned getSpannedText(String text) {
@@ -172,6 +200,30 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
         } else {
             return Html.fromHtml(text);
         }
+    }
+
+    private void filterLanguage(String language) {
+        arraySubtitleFilter.clear();
+        if (language.equals("")){
+            for (Subtitle subtitle : arraySubtitle)
+                    arraySubtitleFilter.add(subtitle);
+
+        }else {
+
+            for (Subtitle subtitle : arraySubtitle)
+                if (subtitle.getLanguague().toLowerCase().equals(language.toLowerCase()))
+                    arraySubtitleFilter.add(subtitle);
+        }
+        if (arraySubtitleFilter.size() > 0) {
+            txtNoSub.setVisibility(View.GONE);
+            listSubtitle.setVisibility(View.VISIBLE);
+            arraySubtitleFilter.add(0, new Subtitle("Release Name/Film title", "Language", "", "", ""));
+            adapter.notifyDataSetChanged();
+        }else{
+            txtNoSub.setVisibility(View.VISIBLE);
+            listSubtitle.setVisibility(View.GONE);
+        }
+
     }
 
     @Override
@@ -183,5 +235,18 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+        String lang = "";
+        if (position != 0)
+            lang = languages.get(position);
+        filterLanguage(lang);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+
     }
 }

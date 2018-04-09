@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import subscene.datnt.com.subscene.adapter.HintAdapter;
 import subscene.datnt.com.subscene.listener.OnItemClickListener;
 import subscene.datnt.com.subscene.R;
+import subscene.datnt.com.subscene.model.Film;
 import subscene.datnt.com.subscene.model.MovieHint;
 import subscene.datnt.com.subscene.thread.HttpService;
 
@@ -29,7 +30,7 @@ import subscene.datnt.com.subscene.thread.HttpService;
 public class SearchHintFragment extends Fragment implements OnItemClickListener, HttpService.HttpResponseListener {
 
     private RecyclerView listFilm;
-    private ArrayList<MovieHint> arrayFilms = new ArrayList<>();
+    private ArrayList<Film> arrayFilms = new ArrayList<>();
     private String stringQuery;
     private HintAdapter adapter;
     private RelativeLayout layoutNoFilm;
@@ -114,7 +115,7 @@ public class SearchHintFragment extends Fragment implements OnItemClickListener,
     }
 
     @Override
-    public void onGetHint(final String query, final ArrayList<MovieHint> listHint) {
+    public void onGetHint(final String query, final ArrayList<Film> listHint) {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {

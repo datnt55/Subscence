@@ -2,14 +2,19 @@ package subscene.datnt.com.subscene.utils;
 
 import android.util.Log;
 
+import org.apache.commons.io.FilenameUtils;
+import org.xml.sax.InputSource;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -213,6 +218,42 @@ public class Decompress {
 
         } finally {
             zis.close();
+        }
+        return unzipFile;
+    }
+
+
+    public static ArrayList<File> unGZip(String zipFile, String targetDirectory) throws IOException {
+        ArrayList<File> unzipFile = new ArrayList<>();
+        File arch = new File(zipFile);
+        if (!arch.exists()) {
+            throw new RuntimeException("the archive does not exit: " + zipFile);
+        }
+        File dest = new File(targetDirectory);
+        if (!dest.exists() || !dest.isDirectory()) {
+            throw new RuntimeException(
+                    "the destination must exist and point to a directory: "
+                            + targetDirectory);
+        }
+        try {
+            GZIPInputStream stream = new GZIPInputStream(new BufferedInputStream(new FileInputStream(arch)));
+            InputSource is = new InputSource(stream);
+            InputStream input = new BufferedInputStream(is.getByteStream());
+            OutputStream output = new FileOutputStream(new File(targetDirectory, FilenameUtils.getBaseName(zipFile)+".srt"));
+            byte data[] = new byte[2097152];
+            long total = 0;
+            int count;
+
+            while ((count = input.read(data)) != -1) {
+                total += count;
+                output.write(data, 0, count);
+            }
+
+            output.flush();
+            output.close();
+            input.close();
+        } catch (IOException ex) {
+
         }
         return unzipFile;
     }

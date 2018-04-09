@@ -108,7 +108,7 @@ public class YifySubtitles extends SubServer {
                     Elements extraInfo = content.select("div.col-xs-12");
                     String actor = extraInfo.get(3).select("span").first().text();
                     String description = extraInfo.get(4).select("span").first().text();
-                    listFilm.add(new YiFyFilm(YIFYSUBTITLE, name,"https://www.yifysubtitles.com"+link, duration, year, actor, description,"https://"+poster));
+                    listFilm.add(new YiFyFilm(YIFYSUBTITLE, name,"https://www.yifysubtitles.com"+link, duration, year, actor, description,"https:"+poster));
                 }
             }
         } catch (IOException e) {
@@ -146,7 +146,7 @@ public class YifySubtitles extends SubServer {
                             name = sub.select("a").text().replaceAll(span,"");
                         }
                     }
-                    listSub.add(new Subtitle(name, lang, "https://"+poster,"https://www.yifysubtitles.com"+download, year));
+                    listSub.add(new Subtitle(name, lang, "https:"+poster,"https://www.yifysubtitles.com"+download, year));
                 }
                 if (listener != null)
                     listener.onFoundListSubtitle(listSub);

@@ -1,6 +1,7 @@
 package subscene.datnt.com.subscene.activity.search;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,8 +13,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import subscene.datnt.com.subscene.R;
+import subscene.datnt.com.subscene.activity.MainActivity;
+import subscene.datnt.com.subscene.activity.SubDetailActivity;
 import subscene.datnt.com.subscene.adapter.OpenSubtitleFilmAdapter;
 import subscene.datnt.com.subscene.adapter.YiFyMovieAdapter;
 import subscene.datnt.com.subscene.listener.OnItemClickListener;
@@ -31,7 +36,7 @@ public class OpenSubtitlesFragment extends Fragment implements OnItemClickListen
     private TextView txtNoFilm;
     private ProgressBar dialog;
     private OpenSubtitle openSubtitle;
-
+    private ArrayList<Subtitle> subtitleArrayList = new ArrayList<>();
     public OpenSubtitlesFragment() {
         // Required empty public constructor
     }
@@ -77,6 +82,21 @@ public class OpenSubtitlesFragment extends Fragment implements OnItemClickListen
     @Override
     public void onItemClick(int position) {
         Film film = arrayFilms.get(position);
+        Intent intent = new Intent(getActivity(), SubDetailActivity.class);
+        intent.putExtra("Film", arrayFilms.get(position));
+        ArrayList<Subtitle> subtitles = new ArrayList<>();
+        for (Subtitle subtitle : subtitleArrayList)
+            if (subtitle.getFilm().equals(film.getName())) {
+                subtitles.add(subtitle);
+            }
+        Collections.sort(subtitles, new Comparator<Subtitle>() {
+            @Override
+            public int compare(Subtitle s1, Subtitle s2) {
+                return s1.getLanguague().compareToIgnoreCase(s2.getLanguague());
+            }
+        });
+        intent.putExtra("Subtitle", subtitles);
+        startActivity(intent);
     }
 
     @Override
@@ -112,6 +132,7 @@ public class OpenSubtitlesFragment extends Fragment implements OnItemClickListen
 
     @Override
     public void onFoundListSubtitle(ArrayList<Subtitle> listSubtitle) {
+        this.subtitleArrayList = listSubtitle;
 
     }
 }
