@@ -54,7 +54,7 @@ public class SeachFilmAsynTask extends AsyncTask<String, Void, ArrayList<Film>> 
                         String links = link.attr("href");
                         String name = link.text();
                         String subCount = element.select("div[class=subtle count]").text();
-                        Film article = new Film(SUBSCENE, name, links, subCount);
+                        Film article = new Film(SUBSCENE, name, "https://subscene.com"+links, subCount);
                         article.setType(type);
                         listArticle.add(article);
                     }

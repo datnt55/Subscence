@@ -5,6 +5,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 
 import subscene.datnt.com.subscene.R;
 import subscene.datnt.com.subscene.activity.search.OpenSubtitlesFragment;
@@ -22,13 +24,27 @@ public class ListSearchResultActivity extends AppCompatActivity {
     private SubsceneSearchFragment subsceneSearchFragment;
     private YiFySearchFragment yiFySearchFragment;
     private OpenSubtitlesFragment openSubtitlesFragment;
+    private Toolbar toolbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_search_result);
         initViewPager();
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setTitle("Search result");
     }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // handle arrow click here
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+        }
 
+        return super.onOptionsItemSelected(item);
+    }
     private void initViewPager() {
         viewPager = findViewById(R.id.lists_pager);
         setupViewPager(viewPager);

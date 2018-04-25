@@ -134,7 +134,7 @@ public class SearchHintFragment extends Fragment implements OnItemClickListener,
                     // listFilm.addItemDecoration(new MarginDividerDecoration(mThis));
                     listFilm.setVisibility(View.VISIBLE);
                     adapter = null;
-                    adapter = new HintAdapter(getActivity(), arrayFilms);
+                    adapter = new HintAdapter(getActivity(), arrayFilms,query);
                     listFilm.setAdapter(adapter);
                     adapter.setOnItemClickListener(SearchHintFragment.this);
                 }

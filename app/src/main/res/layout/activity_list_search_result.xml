@@ -11,22 +11,25 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <RelativeLayout
-            android:id="@+id/layout_search"
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="107dp"
-            android:background="@color/colorPrimary">
-        </RelativeLayout>
-        <include
-            layout="@layout/search_edittext"/>
+            android:layout_height="wrap_content"
+            app:contentInsetStartWithNavigation="0dp"
+            app:titleTextColor="@color/white"
+            android:background="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+
         <android.support.design.widget.TabLayout
             android:id="@+id/tabs"
+            android:layout_below="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="43dp"
-            app:tabBackground="@color/colorPrimary"
-            android:layout_marginTop="64dp"
-            app:tabTextColor="@color/actionbar_unselected_text_color"
-            app:tabSelectedTextColor="@color/white"
+            android:layout_height="56dp"
+            app:tabBackground="@color/white"
+            app:tabTextColor="@color/gray_700"
+            app:tabSelectedTextColor="@color/black_800"
             app:tabMode="fixed"
             app:tabTextAppearance="@style/MineCustomTabText"
             app:tabGravity="fill"  />

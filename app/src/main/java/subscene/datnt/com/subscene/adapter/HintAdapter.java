@@ -5,7 +5,12 @@ package subscene.datnt.com.subscene.adapter;
  */
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,10 +38,10 @@ public class HintAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private String query;
     private OnItemClickListener listener;
 
-    public HintAdapter(Context mContext, ArrayList<Film> mListFile) {
+    public HintAdapter(Context mContext, ArrayList<Film> mListFile, String query) {
         this.mContext = mContext;
         this.mListHint = mListFile;
-
+        this.query = query;
     }
 
     public void setOnItemClickListener(OnItemClickListener listener){
@@ -54,6 +59,7 @@ public class HintAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final HintViewHolder mHolder = (HintViewHolder) holder;
         mHolder.txtMovie.setText(mListHint.get(position).getName());
+        //highlightText( mHolder.txtMovie, query);
         mHolder.root.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -63,7 +69,21 @@ public class HintAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
         });
     }
-
+    private void highlightText(TextView mTextView, String s) {
+        SpannableString spannableString = new SpannableString(mTextView.getText());
+        BackgroundColorSpan[] backgroundColorSpan =
+                spannableString.getSpans(0, spannableString.length(), BackgroundColorSpan.class);
+        for (BackgroundColorSpan bgSpan : backgroundColorSpan) {
+            spannableString.removeSpan(bgSpan);
+        }
+        int indexOfKeyWord = spannableString.toString().indexOf(s);
+        while (indexOfKeyWord > 0) {
+            spannableString.setSpan(new ForegroundColorSpan(Color.YELLOW), indexOfKeyWord,
+                    indexOfKeyWord + s.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            indexOfKeyWord = spannableString.toString().indexOf(s, indexOfKeyWord + s.length());
+        }
+        mTextView.setText(spannableString);
+    }
     @Override
     public int getItemCount() {
         return mListHint.size();

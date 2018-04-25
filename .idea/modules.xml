@@ -3,11 +3,11 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Subscence.iml" filepath="$PROJECT_DIR$/Subscence.iml" />
-      <module fileurl="file://E:\Android\Project\New folder\Subscence\Subscence.iml" filepath="E:\Android\Project\New folder\Subscence\Subscence.iml" />
+      <module fileurl="file://E:/Android/Project/New folder/Subscence/Subscence.iml" filepath="E:/Android/Project/New folder/Subscence/Subscence.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://E:\Android\Project\New folder\Subscence\app\app.iml" filepath="E:\Android\Project\New folder\Subscence\app\app.iml" />
+      <module fileurl="file://E:/Android/Project/New folder/Subscence/app/app.iml" filepath="E:/Android/Project/New folder/Subscence/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/unrar/unrar.iml" filepath="$PROJECT_DIR$/unrar/unrar.iml" />
-      <module fileurl="file://E:\Android\Project\New folder\Subscence\unrar\unrar.iml" filepath="E:\Android\Project\New folder\Subscence\unrar\unrar.iml" />
+      <module fileurl="file://E:/Android/Project/New folder/Subscence/unrar/unrar.iml" filepath="E:/Android/Project/New folder/Subscence/unrar/unrar.iml" />
     </modules>
   </component>
 </project>

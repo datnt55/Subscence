@@ -158,7 +158,7 @@ public class AutoDownloadFragment extends Fragment implements
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-        Toast.makeText(getActivity(), languages.get(i), Toast.LENGTH_LONG).show();
+       //Toast.makeText(getActivity(), languages.get(i), Toast.LENGTH_LONG).show();
         ownLanguage = languages.get(i);
     }
 
