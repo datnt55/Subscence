@@ -142,8 +142,12 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
             subscene = new Subscene(this);
         else if (serverType == ServerType.YIFYSUBTITLE) {
             subscene = new YifySubtitles(this);
-            YiFyFilm yiFyFilm = (YiFyFilm) film;
-            txtDescription.setText(yiFyFilm.getDescription());
+            try {
+                YiFyFilm yiFyFilm = (YiFyFilm) film;
+                txtDescription.setText(yiFyFilm.getDescription());
+            }catch (Exception e){
+                txtDescription.setText("");
+            }
         } else if (serverType == ServerType.OPENSUBTITLE) {
             //subscene = new OpenSubtitle(this);
             updateView("",subtitle.getLink(),"","");

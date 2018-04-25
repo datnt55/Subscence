@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import subscene.datnt.com.subscene.model.Language;
 import subscene.datnt.com.subscene.thread.GetLanguagesAsynTask;
 import subscene.datnt.com.subscene.thread.SeachFilmAsynTask;
 import subscene.datnt.com.subscene.listener.OnItemClickListener;
@@ -37,15 +38,16 @@ import subscene.datnt.com.subscene.utils.SharePreference;
 public class AutoDownloadFragment extends Fragment implements
         OnItemClickListener,
         SeachFilmAsynTask.OnSearchFilmListener,
-        AdapterView.OnItemSelectedListener{
+        AdapterView.OnItemSelectedListener {
     private ProgressBar progressBar;
     private RecyclerView listFilm;
     private ArrayList<File> localFiles = new ArrayList<>();
     private String url = "https://subscene.com/subtitles/title?q=aven&l=";
     private ProgressDialog dialog;
     private Spinner spnLanguage;
-    private ArrayList<String> languages = new ArrayList<>();
+    private ArrayList<Language> languages = new ArrayList<>();
     private String ownLanguage;
+
     public AutoDownloadFragment() {
         // Required empty public constructor
     }
@@ -59,7 +61,7 @@ public class AutoDownloadFragment extends Fragment implements
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v =  inflater.inflate(R.layout.fragment_auto_download, container, false);
+        View v = inflater.inflate(R.layout.fragment_auto_download, container, false);
         progressBar = v.findViewById(R.id.progressBar);
         listFilm = v.findViewById(R.id.list_local_file);
         listFilm.setHasFixedSize(true);
@@ -74,22 +76,20 @@ public class AutoDownloadFragment extends Fragment implements
     private ArrayList<File> getAllMediaFile(File[] file) {
         ArrayList<File> files = new ArrayList<>();
         AudioFileFilter fileFilter = new AudioFileFilter();
-        for (int i = 0 ; i < file.length; i++){
+        for (int i = 0; i < file.length; i++) {
             File subFile = file[i];
             if (subFile.isDirectory()) {
                 files.addAll(getAllMediaFileInFolder(subFile));
-            }
-            else if (fileFilter.checkFileExtension(subFile))
+            } else if (fileFilter.checkFileExtension(subFile))
                 files.add(subFile);
         }
         return files;
     }
 
-    private ArrayList<File> getAllMediaFileInFolder(File file){
+    private ArrayList<File> getAllMediaFileInFolder(File file) {
         ArrayList<File> files = new ArrayList<>();
         AudioFileFilter fileFilter = new AudioFileFilter();
-        for (File f : file.listFiles())
-        {
+        for (File f : file.listFiles()) {
             if (f.isDirectory())
                 files.addAll(getAllMediaFileInFolder(f));
             else if (fileFilter.checkFileExtension(f))
@@ -130,8 +130,8 @@ public class AutoDownloadFragment extends Fragment implements
         String fileName = localFiles.get(position).getName();
         int i = fileName.lastIndexOf('.');
         if (i > 0)
-            fileName = fileName.substring(0,i);
-        String url  = "https://subscene.com/subtitles/title?q="+fileName+"&l=";
+            fileName = fileName.substring(0, i);
+        String url = "https://subscene.com/subtitles/title?q=" + fileName + "&l=";
         new SeachFilmAsynTask(ownLanguage, this).execute(url);
     }
 
@@ -158,8 +158,8 @@ public class AutoDownloadFragment extends Fragment implements
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-       //Toast.makeText(getActivity(), languages.get(i), Toast.LENGTH_LONG).show();
-        ownLanguage = languages.get(i);
+        //Toast.makeText(getActivity(), languages.get(i), Toast.LENGTH_LONG).show();
+        ownLanguage = languages.get(i).getName();
     }
 
     @Override
@@ -167,20 +167,20 @@ public class AutoDownloadFragment extends Fragment implements
 
     }
 
-    private class GetAllFileInStorage extends AsyncTask<Void, Void, ArrayList<File>>{
+    private class GetAllFileInStorage extends AsyncTask<Void, Void, ArrayList<File>> {
 
         @Override
         protected ArrayList<File> doInBackground(Void... voids) {
             SharePreference preference = new SharePreference(getActivity());
             languages = preference.getLanguage();
-            Collections.sort(languages, new Comparator<String>() {
+            Collections.sort(languages, new Comparator<Language>() {
                 @Override
-                public int compare(String s1, String s2) {
-                    return s1.compareToIgnoreCase(s2);
+                public int compare(Language s1, Language s2) {
+                    return s1.getName().compareToIgnoreCase(s2.getName());
                 }
             });
             File[] file = Environment.getExternalStorageDirectory().listFiles(new AudioFileFilter());
-            return  getAllMediaFile(file);
+            return getAllMediaFile(file);
         }
 
         @Override
@@ -188,14 +188,25 @@ public class AutoDownloadFragment extends Fragment implements
             super.onPostExecute(files);
             progressBar.setVisibility(View.GONE);
             localFiles = files;
-            LocalFileAdapter adapter = new LocalFileAdapter(getActivity(),localFiles);
+            LocalFileAdapter adapter = new LocalFileAdapter(getActivity(), localFiles);
             adapter.setOnItemClickListener(AutoDownloadFragment.this);
             listFilm.setAdapter(adapter);
 
             spnLanguage.setOnItemSelectedListener(AutoDownloadFragment.this);
-            ArrayAdapter aa = new ArrayAdapter(getActivity(),android.R.layout.simple_spinner_item,languages);
+            ArrayList<String> languageName = new ArrayList<>();
+            for (Language language : languages)
+                languageName.add(language.getName());
+            ArrayAdapter aa = new ArrayAdapter(getActivity(), android.R.layout.simple_spinner_item, languageName);
             aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spnLanguage.setAdapter(aa);
+            Language lang = new SharePreference(getActivity()).getCurrentLanguage();
+            for (int i = 0; i < languages.size(); i++) {
+                if (languages.get(i).getId().equals(lang.getId())) {
+                    spnLanguage.setSelection(i);
+                    break;
+                }
+            }
+
         }
     }
 }

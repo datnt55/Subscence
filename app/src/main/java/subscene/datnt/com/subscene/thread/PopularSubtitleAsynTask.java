@@ -56,7 +56,7 @@ public class PopularSubtitleAsynTask extends AsyncTask<Void, Void, ArrayList<Pop
             try {
                 url = new URL("https://subscene.com/browse/popular/series/1");
                 URLConnection conn = url.openConnection();
-                conn.setRequestProperty("Cookie", "LanguageFilter=45");
+                conn.setRequestProperty("Cookie", "LanguageFilter="+language);
                 // Send the request to the server
                 //conn.connect();
 

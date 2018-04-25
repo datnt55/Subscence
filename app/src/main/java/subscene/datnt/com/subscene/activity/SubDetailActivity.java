@@ -31,6 +31,7 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 import java.util.ArrayList;
 
 import subscene.datnt.com.subscene.listener.OnSceneListener;
+import subscene.datnt.com.subscene.model.Language;
 import subscene.datnt.com.subscene.thread.OpenSubtitle;
 import subscene.datnt.com.subscene.thread.SubServer;
 import subscene.datnt.com.subscene.thread.Subscene;
@@ -185,7 +186,9 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
         txtYear.setText(getSpannedText(mThis.getResources().getString(R.string.film_year, subtitles.get(0).getYear())));
         adapter.setOnItemClickListener(SubDetailActivity.this);
         txtTitle.setText("Subtitles for "+ film.getName());
-        languages = new SharePreference(this).getLanguage();
+        ArrayList<Language> languageArrayList = new SharePreference(this).getLanguage();
+        for (Language language : languageArrayList)
+            languages.add(language.getName());
         languages.add(0, "All");
         spnLanguage.setOnItemSelectedListener(this);
         ArrayAdapter aa = new ArrayAdapter(this,android.R.layout.simple_spinner_item,languages);

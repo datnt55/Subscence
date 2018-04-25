@@ -11,8 +11,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -21,18 +24,26 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import subscene.datnt.com.subscene.adapter.PopularFilmAdapter;
 import subscene.datnt.com.subscene.listener.OnItemClickListener;
+import subscene.datnt.com.subscene.model.Language;
 import subscene.datnt.com.subscene.model.PopularFilm;
 import subscene.datnt.com.subscene.R;
 import subscene.datnt.com.subscene.thread.PopularSubtitleAsynTask;
+import subscene.datnt.com.subscene.utils.SharePreference;
 
-public class PopularFragment extends Fragment implements PopularSubtitleAsynTask.OnSearchPopolarFilmListener, OnItemClickListener {
+public class PopularFragment extends Fragment implements PopularSubtitleAsynTask.OnSearchPopolarFilmListener, OnItemClickListener, AdapterView.OnItemSelectedListener {
     private ProgressBar progressBar;
     private RecyclerView listFilm;
     private RelativeLayout root;
     private ArrayList<PopularFilm> listPopularFilm = new ArrayList<>();
+    private Spinner spnLanguage;
+    private ArrayList<Language> languages = new ArrayList<>();
+    private Language ownLanguage;
+
     public PopularFragment() {
         // Required empty public constructor
     }
@@ -54,7 +65,31 @@ public class PopularFragment extends Fragment implements PopularSubtitleAsynTask
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         listFilm.setLayoutManager(mLayoutManager);
         progressBar.setVisibility(View.VISIBLE);
-        new PopularSubtitleAsynTask("",this).execute();
+        spnLanguage = v.findViewById(R.id.spr_language);
+        ownLanguage = new SharePreference(getActivity()).getCurrentLanguage();
+
+        SharePreference preference = new SharePreference(getActivity());
+        languages = preference.getLanguage();
+        Collections.sort(languages, new Comparator<Language>() {
+            @Override
+            public int compare(Language s1, Language s2) {
+                return s1.getName().compareToIgnoreCase(s2.getName());
+            }
+        });
+        ArrayList<String> languageName = new ArrayList<>();
+        for (Language language : languages)
+            languageName.add(language.getName());
+        spnLanguage.setOnItemSelectedListener(PopularFragment.this);
+        ArrayAdapter aa = new ArrayAdapter(getActivity(), android.R.layout.simple_spinner_item, languageName);
+        aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spnLanguage.setAdapter(aa);
+        Language lang = new SharePreference(getActivity()).getCurrentLanguage();
+        for (int i = 0; i < languages.size(); i++) {
+            if (languages.get(i).getId().equals(lang.getId())) {
+                spnLanguage.setSelection(i);
+                break;
+            }
+        }
         return v;
     }
 
@@ -73,6 +108,7 @@ public class PopularFragment extends Fragment implements PopularSubtitleAsynTask
     @Override
     public void onSearchSuccess(ArrayList<PopularFilm> link) {
         progressBar.setVisibility(View.GONE);
+        listFilm.setVisibility(View.VISIBLE);
         if (link == null){
             Snackbar snackbar = Snackbar
                     .make(root, "Oops, Fetching data failure ", Snackbar.LENGTH_LONG)
@@ -91,7 +127,6 @@ public class PopularFragment extends Fragment implements PopularSubtitleAsynTask
         PopularFilmAdapter adapter = new PopularFilmAdapter(getActivity(),listPopularFilm);
         adapter.setOnItemClickListener(this);
         listFilm.setAdapter(adapter);
-
     }
 
     @Override
@@ -99,5 +134,19 @@ public class PopularFragment extends Fragment implements PopularSubtitleAsynTask
         Intent intent = new Intent(getActivity(), SubtitleDownloadActivity.class);
         intent.putExtra("PopularFilm", listPopularFilm.get(position));
         startActivity(intent);
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        ownLanguage = languages.get(position);
+        new SharePreference(getActivity()).saveCurrentLanguage(ownLanguage);
+        progressBar.setVisibility(View.VISIBLE);
+        listFilm.setVisibility(View.GONE);
+        new PopularSubtitleAsynTask(ownLanguage.getId(),this).execute();
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 }

@@ -13,6 +13,7 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import subscene.datnt.com.subscene.model.Language;
 import subscene.datnt.com.subscene.model.Subtitle;
 import subscene.datnt.com.subscene.utils.Globals;
 
@@ -20,16 +21,16 @@ import subscene.datnt.com.subscene.utils.Globals;
  * Created by DatNT on 3/30/2018.
  */
 
-public class GetLanguagesAsynTask extends AsyncTask<Void, Void, ArrayList<String>> {
+public class GetLanguagesAsynTask extends AsyncTask<Void, Void, ArrayList<Language>> {
     private OnGetLanguageListener listener;
     public GetLanguagesAsynTask(Context context, OnGetLanguageListener listener) {
         this.listener = listener;
     }
 
     @Override
-    protected ArrayList<String> doInBackground(Void... strings) {
+    protected ArrayList<Language> doInBackground(Void... strings) {
         Document document = null;
-        ArrayList<String> listLanguage = new ArrayList<>();
+        ArrayList<Language> listLanguage = new ArrayList<>();
         try {
             document = (Document) Jsoup.connect("https://u.subscene.com/filter").get();
             if (document != null) {
@@ -37,8 +38,9 @@ public class GetLanguagesAsynTask extends AsyncTask<Void, Void, ArrayList<String
                 Elements languages = document.select("div.col-md-3 > div.checkbox > label");
                 for (Element element : languages) {
                     String input = element.select("input").first().text();
+                    String id = element.select("input").first().attr("value");
                     String language = element.text().replaceFirst(input, "").trim();
-                    listLanguage.add(language);
+                    listLanguage.add(new Language(id, language));
                 }
             }
 
@@ -52,13 +54,13 @@ public class GetLanguagesAsynTask extends AsyncTask<Void, Void, ArrayList<String
     }
 
     @Override
-    protected void onPostExecute(ArrayList<String> languages) {
+    protected void onPostExecute(ArrayList<Language> languages) {
         super.onPostExecute(languages);
         if (listener != null )
             listener.onGetLanguage(languages);
     }
 
     public interface OnGetLanguageListener{
-        void onGetLanguage(ArrayList<String> languages);
+        void onGetLanguage(ArrayList<Language> languages);
     }
 }
