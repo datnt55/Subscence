@@ -22,9 +22,12 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.apache.commons.io.FilenameUtils;
+
 import java.io.File;
 
 import subscene.datnt.com.subscene.thread.YifySubtitles;
+import subscene.datnt.com.subscene.utils.FileUtil;
 import subscene.datnt.com.subscene.utils.Globals;
 import subscene.datnt.com.subscene.R;
 import subscene.datnt.com.subscene.widget.FilePickerBottomSheet;
@@ -313,18 +316,21 @@ public class MainActivity extends AppCompatActivity implements DownloadedFragmen
 
     @Override
     public void onDataPass(File file) {
+        this.moveFile = file;
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
     }
-
+    File moveFile;
     @Override
     public void onCopy(String filename, File path) {
-
+        String extension = FilenameUtils.getExtension(moveFile.getAbsolutePath());
+        FileUtil.move(filename + "." + extension, moveFile, path);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
 
     @Override
     public void onCancelCopy() {
-
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
 
     @Override

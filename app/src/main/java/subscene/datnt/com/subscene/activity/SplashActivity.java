@@ -52,7 +52,7 @@ public class SplashActivity extends AppCompatActivity implements GetLanguagesAsy
                     startActivity(intent);
                     finish();
                 }
-            }, 3000);
+            }, 1500);
         else
             new GetLanguagesAsynTask(this, this).execute();
     }

@@ -59,7 +59,7 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
     private TextView txtNoSub;
     private NestedScrollView layoutContent;
     private Spinner spnLanguage;
-    private ArrayList<String> languages;
+    private ArrayList<String> languages =new ArrayList<>();
     private ArrayList<Subtitle> arraySubtitle = new ArrayList<>();
     private ArrayList<Subtitle> arraySubtitleFilter = new ArrayList<>();
     private SubtitleAdapter adapter;

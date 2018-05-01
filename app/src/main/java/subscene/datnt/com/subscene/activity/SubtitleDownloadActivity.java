@@ -269,9 +269,9 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
 
     @Override
     public void onCopy(String fileName, File path) {
-        if (extractFile.size() == 1) {
-            String extension = FilenameUtils.getExtension(extractFile.get(0).getAbsolutePath());
-            FileUtil.move(fileName + "." + extension, extractFile.get(0), path);
+        for (File file : extractFile) {
+            String extension = FilenameUtils.getExtension(file.getAbsolutePath());
+            FileUtil.move(fileName + "." + extension, file, path);
         }
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
@@ -419,7 +419,7 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
             if (result != null)
                 Toast.makeText(mThis, "Download error: " + result, Toast.LENGTH_LONG).show();
             else {
-                Toast.makeText(mThis, fileName + " downloaded", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(mThis, fileName + " downloaded", Toast.LENGTH_SHORT).show();
                 if (FilenameUtils.getExtension(new File(APP_FOLDER, fileName).getAbsolutePath()).equals("rar"))
                     extractFile = Decompress.extractArchive(APP_FOLDER+ "/" + fileName, APP_FOLDER);
                 else  if (FilenameUtils.getExtension(new File(APP_FOLDER, fileName).getAbsolutePath()).equals("zip"))
@@ -434,7 +434,7 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-               // new File(APP_FOLDER, fileName).delete();
+                new File(APP_FOLDER, fileName).delete();
                 moveSubtitleToVideoFolder();
             }
 

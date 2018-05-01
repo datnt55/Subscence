@@ -54,7 +54,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="10dp"
                         android:layout_toRightOf="@+id/img_poster"
-                        android:text="TextView"
+                        android:text=""
                         android:textColor="#000" />
 
                 </RelativeLayout>
@@ -80,10 +80,9 @@
                     app:sbg_dividerSize="4dp"
                     app:sbg_position="0"
                     app:sbg_radius="10dp"
-                    app:sbg_ripple="true"
-                    app:sbg_rippleColor="#64B5F6"
+                    app:sbg_ripple="false"
                     app:sbg_selectorBackgroundDrawable="@drawable/gradient_drawable_selector"
-                    app:sbg_selectorColor="#0091EA">
+                    app:sbg_selectorColor="@color/colorPrimary">
 
                     <co.ceryle.segmentedbutton.SegmentedButton
                         android:layout_width="0dp"

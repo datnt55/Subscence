@@ -19,6 +19,7 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:clickable="true"
+            android:visibility="gone"
             android:foreground="?android:attr/selectableItemBackground"
             android:textStyle="bold"
             android:text="Ok" />
@@ -27,7 +28,7 @@
             android:layout_width="50dp"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:layout_toLeftOf="@+id/txt_ok"
+            android:layout_alignParentRight="true"
             android:textColor="@color/colorAccent"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"

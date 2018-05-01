@@ -18,10 +18,10 @@ import subscene.datnt.com.subscene.model.SubtitleDetail;
  * Created by DatNT on 3/30/2018.
  */
 
-public class DownloadSubAsynTask extends AsyncTask<String, Void, String> {
+public class GetLinkDownloadSubAsynTask extends AsyncTask<String, Void, String> {
     private OnDownloadSubtitleListener listener;
 
-    public DownloadSubAsynTask(OnDownloadSubtitleListener listener) {
+    public GetLinkDownloadSubAsynTask(OnDownloadSubtitleListener listener) {
         this.listener = listener;
     }
 

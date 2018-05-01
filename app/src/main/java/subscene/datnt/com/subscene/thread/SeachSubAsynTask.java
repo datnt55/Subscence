@@ -1,12 +1,6 @@
 package subscene.datnt.com.subscene.thread;
 
-import android.app.ProgressDialog;
 import android.os.AsyncTask;
-import android.support.design.widget.Snackbar;
-import android.view.View;
-
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -15,13 +9,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 
-import subscene.datnt.com.subscene.R;
-import subscene.datnt.com.subscene.activity.SubDetailActivity;
-import subscene.datnt.com.subscene.adapter.SubtitleAdapter;
-import subscene.datnt.com.subscene.model.Film;
 import subscene.datnt.com.subscene.model.Subtitle;
 import subscene.datnt.com.subscene.utils.Globals;
 
@@ -29,7 +18,7 @@ import subscene.datnt.com.subscene.utils.Globals;
  * Created by DatNT on 3/30/2018.
  */
 
-public class SeachSubAsynTask extends AsyncTask<String, Void, String> implements DownloadSubAsynTask.OnDownloadSubtitleListener {
+public class SeachSubAsynTask extends AsyncTask<String, Void, String> implements GetLinkDownloadSubAsynTask.OnDownloadSubtitleListener {
     private OnSearchSubListener listener;
 
     public SeachSubAsynTask(OnSearchSubListener listener) {
@@ -85,7 +74,7 @@ public class SeachSubAsynTask extends AsyncTask<String, Void, String> implements
     @Override
     protected void onPostExecute(String subtitles) {
         super.onPostExecute(subtitles);
-        new DownloadSubAsynTask(this).execute(Globals.URL + subtitles);
+        new GetLinkDownloadSubAsynTask(this).execute(Globals.URL + subtitles);
     }
 
     @Override

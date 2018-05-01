@@ -20,12 +20,15 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import org.apache.commons.io.FilenameUtils;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
 import subscene.datnt.com.subscene.model.Language;
+import subscene.datnt.com.subscene.thread.DownloadFileFromURL;
 import subscene.datnt.com.subscene.thread.GetLanguagesAsynTask;
 import subscene.datnt.com.subscene.thread.SeachFilmAsynTask;
 import subscene.datnt.com.subscene.listener.OnItemClickListener;
@@ -38,7 +41,7 @@ import subscene.datnt.com.subscene.utils.SharePreference;
 public class AutoDownloadFragment extends Fragment implements
         OnItemClickListener,
         SeachFilmAsynTask.OnSearchFilmListener,
-        AdapterView.OnItemSelectedListener {
+        AdapterView.OnItemSelectedListener, DownloadFileFromURL.DownloadFileListener {
     private ProgressBar progressBar;
     private RecyclerView listFilm;
     private ArrayList<File> localFiles = new ArrayList<>();
@@ -46,7 +49,7 @@ public class AutoDownloadFragment extends Fragment implements
     private ProgressDialog dialog;
     private Spinner spnLanguage;
     private ArrayList<Language> languages = new ArrayList<>();
-    private String ownLanguage;
+    private String currentPath;
 
     public AutoDownloadFragment() {
         // Required empty public constructor
@@ -128,11 +131,13 @@ public class AutoDownloadFragment extends Fragment implements
     @Override
     public void onItemClick(int position) {
         String fileName = localFiles.get(position).getName();
+        currentPath = FilenameUtils.getFullPath(localFiles.get(position).getAbsolutePath());
         int i = fileName.lastIndexOf('.');
         if (i > 0)
             fileName = fileName.substring(0, i);
         String url = "https://subscene.com/subtitles/title?q=" + fileName + "&l=";
-        new SeachFilmAsynTask(ownLanguage, this).execute(url);
+        Language ownLanguage = new SharePreference(getActivity()).getCurrentLanguage();
+        new SeachFilmAsynTask(ownLanguage.getName(), this).execute(url);
     }
 
     @Override
@@ -153,18 +158,28 @@ public class AutoDownloadFragment extends Fragment implements
     @Override
     public void onSearchSuccess(String url) {
         dialog.dismiss();
-        Toast.makeText(getActivity(), url, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getActivity(), url, Toast.LENGTH_SHORT).show();
+        new DownloadFileFromURL(getActivity(),currentPath,this).execute("https://subscene.com"+url);
     }
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
         //Toast.makeText(getActivity(), languages.get(i), Toast.LENGTH_LONG).show();
-        ownLanguage = languages.get(i).getName();
+        //ownLanguage = languages.get(i).getName();
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
 
+    }
+
+    @Override
+    public void onDownloaded(boolean isDownload) {
+        if (!isDownload){
+            Toast.makeText(getActivity(),"Can't found subtitile",Toast.LENGTH_SHORT).show();
+        }else {
+            Toast.makeText(getActivity(),"Download subtitile success",Toast.LENGTH_SHORT).show();
+        }
     }
 
     private class GetAllFileInStorage extends AsyncTask<Void, Void, ArrayList<File>> {
