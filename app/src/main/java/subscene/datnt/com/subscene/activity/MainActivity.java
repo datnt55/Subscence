@@ -123,9 +123,9 @@ public class MainActivity extends AppCompatActivity implements DownloadedFragmen
         adapter.addFrag(downloadedFragment, "Downloaded");
         viewPager.setAdapter(adapter);
 
-        viewPager.setOffscreenPageLimit(3);
-        int limit = (adapter.getCount() > 1 ? adapter.getCount() - 1 : 1);
-        viewPager.setOffscreenPageLimit(limit);
+//        viewPager.setOffscreenPageLimit(3);
+//        int limit = (adapter.getCount() > 1 ? adapter.getCount() - 1 : 1);
+//        viewPager.setOffscreenPageLimit(limit);
     }
     private void setupTabIcons() {
         tabLayout.getTabAt(0).setText("Popular Subs");

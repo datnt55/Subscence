@@ -18,6 +18,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.commons.io.FilenameUtils;
@@ -50,6 +51,7 @@ public class AutoDownloadFragment extends Fragment implements
     private Spinner spnLanguage;
     private ArrayList<Language> languages = new ArrayList<>();
     private String currentPath;
+    private TextView noVideo;
 
     public AutoDownloadFragment() {
         // Required empty public constructor
@@ -66,6 +68,7 @@ public class AutoDownloadFragment extends Fragment implements
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_auto_download, container, false);
         progressBar = v.findViewById(R.id.progressBar);
+        noVideo = v.findViewById(R.id.txt_no_video);
         listFilm = v.findViewById(R.id.list_local_file);
         listFilm.setHasFixedSize(true);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
@@ -202,6 +205,11 @@ public class AutoDownloadFragment extends Fragment implements
         protected void onPostExecute(ArrayList<File> files) {
             super.onPostExecute(files);
             progressBar.setVisibility(View.GONE);
+            if (files.size() == 0){
+                noVideo.setVisibility(View.VISIBLE);
+                listFilm.setVisibility(View.GONE);
+                return;
+            }
             localFiles = files;
             LocalFileAdapter adapter = new LocalFileAdapter(getActivity(), localFiles);
             adapter.setOnItemClickListener(AutoDownloadFragment.this);

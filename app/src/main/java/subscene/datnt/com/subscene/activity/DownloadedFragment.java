@@ -20,7 +20,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -43,7 +46,7 @@ public class DownloadedFragment extends Fragment implements DownloadFileAdapter.
     private RecyclerView listFileDownloaded;
     private ArrayList<File> downloadedFiles = new ArrayList<>();
     private DownloadFileAdapter adapter;
-
+    private TextView txtNoSub;
     public interface OnDataPass {
         public void onDataPass(File data);
     }
@@ -64,15 +67,21 @@ public class DownloadedFragment extends Fragment implements DownloadFileAdapter.
         // Inflate the layout for this fragment
         View v =  inflater.inflate(R.layout.fragment_downloaded, container, false);
         progressBar = v.findViewById(R.id.progressBar);
+        txtNoSub = v.findViewById(R.id.txt_no_sub);
         listFileDownloaded = v.findViewById(R.id.list_download_file);
         listFileDownloaded.setHasFixedSize(true);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         listFileDownloaded.setLayoutManager(mLayoutManager);
         getListDownloadedFile();
 
-        adapter = new DownloadFileAdapter(getActivity(), downloadedFiles);
-        adapter.setOnItemClickListener(this);
-        listFileDownloaded.setAdapter(adapter);
+        if (downloadedFiles.size() == 0){
+            txtNoSub.setVisibility(View.VISIBLE);
+            listFileDownloaded.setVisibility(View.GONE);
+        }else {
+            adapter = new DownloadFileAdapter(getActivity(), downloadedFiles);
+            adapter.setOnItemClickListener(this);
+            listFileDownloaded.setAdapter(adapter);
+        }
         progressBar.setVisibility(View.GONE);
         return v;
     }
