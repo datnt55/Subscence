@@ -77,9 +77,10 @@ public class SplashActivity extends AppCompatActivity implements GetLanguagesAsy
         try {
             JSONObject languageObj = new JSONObject();
             JSONArray jsonArray = new JSONArray();
-            String current = Locale.getDefault().getDisplayLanguage();
+            String current = Locale.getDefault().getDisplayLanguage(Locale.ENGLISH);
+            Language english;
             for (int i = 1; i < languages.size(); i++) {
-                if (languages.get(i).getName().equals(current))
+                if (languages.get(i).getName().toLowerCase().equals(current.toLowerCase()))
                     preference.saveCurrentLanguage(languages.get(i));
                 JSONObject item = new JSONObject();
                 item.put("id", languages.get(i).getId());
@@ -88,6 +89,8 @@ public class SplashActivity extends AppCompatActivity implements GetLanguagesAsy
             }
             languageObj.put("language", jsonArray);
             preference.saveLanguage(languageObj.toString());
+
+
         } catch (JSONException e) {
             e.printStackTrace();
         }

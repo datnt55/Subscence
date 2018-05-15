@@ -37,4 +37,5 @@ public class Globals {
     public static final int VELOCITY_CURRENT = 1000;
 
     public static final String URL = "https://subscene.com/";
+    public static final String URL_OMDB = "http://www.omdbapi.com/";
 }

@@ -17,6 +17,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import subscene.datnt.com.subscene.model.Film;
 import subscene.datnt.com.subscene.model.MovieHint;
+import subscene.datnt.com.subscene.utils.Globals;
 import subscene.datnt.com.subscene.utils.ServerType;
 
 /**
@@ -39,7 +40,7 @@ public class HttpService {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                innerGetHintData(movie);
+                innerGetHintOMData(movie);
             }
         });
     }
@@ -59,6 +60,36 @@ public class HttpService {
             for (int i = 0 ; i < jsonArray.length(); i++){
                 JSONObject json = jsonArray.getJSONObject(i);
                 listHint.add(new Film(ServerType.YIFYSUBTITLE, json.getString("movie"),"https://www.yifysubtitles.com/movie-imdb/"+json.getString("imdb")));
+            }
+            // Do something with the response.
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        if (listener != null)
+            listener.onGetHint(movie, listHint);
+        handler.getLooper().quit();
+    }
+
+    public void innerGetHintOMData(String movie){
+        ArrayList<Film> listHint = new ArrayList<>();
+        OkHttpClient.Builder builder = new OkHttpClient.Builder().connectTimeout(3000, TimeUnit.MILLISECONDS);
+        OkHttpClient client = builder.build();
+        HttpUrl.Builder httpBuider = HttpUrl.parse(Globals.URL_OMDB).newBuilder();
+        httpBuider.addQueryParameter("s", movie);
+        httpBuider.addQueryParameter("apikey", "d05b362f");
+        Request request = new Request.Builder().url(httpBuider.build()).build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            String jsonData = response.body().string();
+            JSONObject data = new JSONObject(jsonData);
+
+            JSONArray jsonArray = data.getJSONArray("Search");
+            for (int i = 0 ; i < jsonArray.length(); i++){
+                JSONObject json = jsonArray.getJSONObject(i);
+                listHint.add(new Film(ServerType.YIFYSUBTITLE, json.getString("Title"),json.getString("imdbID")));
             }
             // Do something with the response.
         } catch (IOException e) {
