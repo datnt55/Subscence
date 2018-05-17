@@ -89,7 +89,7 @@ public class HttpService {
             JSONArray jsonArray = data.getJSONArray("Search");
             for (int i = 0 ; i < jsonArray.length(); i++){
                 JSONObject json = jsonArray.getJSONObject(i);
-                listHint.add(new Film(ServerType.YIFYSUBTITLE, json.getString("Title"),json.getString("imdbID")));
+                listHint.add(new Film(ServerType.OMDBAPI, json.getString("Title"),json.getString("imdbID")));
             }
             // Do something with the response.
         } catch (IOException e) {
