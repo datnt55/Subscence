@@ -1,6 +1,8 @@
 package subscene.datnt.com.subscene.activity;
 
 import android.app.Fragment;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -9,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -17,17 +20,27 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.util.ArrayList;
 
 import subscene.datnt.com.subscene.adapter.HintAdapter;
 import subscene.datnt.com.subscene.listener.OnItemClickListener;
 import subscene.datnt.com.subscene.R;
+import subscene.datnt.com.subscene.listener.OnSceneListener;
 import subscene.datnt.com.subscene.model.Film;
 import subscene.datnt.com.subscene.model.MovieHint;
+import subscene.datnt.com.subscene.model.Subtitle;
 import subscene.datnt.com.subscene.thread.HttpService;
+import subscene.datnt.com.subscene.thread.Subscene;
+import subscene.datnt.com.subscene.thread.YifySubtitles;
 
 
-public class SearchHintFragment extends Fragment implements OnItemClickListener, HttpService.HttpResponseListener {
+public class SearchHintFragment extends Fragment implements OnItemClickListener, HttpService.HttpResponseListener, OnSceneListener {
 
     private RecyclerView listFilm;
     private ArrayList<Film> arrayFilms = new ArrayList<>();
@@ -36,6 +49,11 @@ public class SearchHintFragment extends Fragment implements OnItemClickListener,
     private RelativeLayout layoutNoFilm;
     private ProgressBar dialog;
     private ImageView imgSearch;
+    private Subscene subscene;
+    private String imdb = "";
+    private int position;
+    private ArrayList<Subtitle> arraySubscene = new ArrayList<>();
+    private ArrayList<Subtitle> arrayYify = new ArrayList<>();
 
     public SearchHintFragment() {
         // Required empty public constructor
@@ -64,7 +82,7 @@ public class SearchHintFragment extends Fragment implements OnItemClickListener,
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), ListSearchResultActivity.class);
-                intent.putExtra("Search",stringQuery);
+                intent.putExtra("Search", stringQuery);
                 startActivity(intent);
             }
         });
@@ -105,13 +123,44 @@ public class SearchHintFragment extends Fragment implements OnItemClickListener,
         }
     }
 
-    @Override
-    public void onItemClick(int position) {
-        Intent intent = new Intent(getActivity(), SubDetailActivity.class);
-        intent.putExtra("Film", arrayFilms.get(position));
-        startActivity(intent);
-        ((MainActivity) getActivity()).exitSearchUi();
+    ProgressDialog prepareDialog;
 
+    @Override
+    public void onItemClick(final int position) {
+        this.position = position;
+        filmPos = 0;
+
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            view.clearFocus();
+        }
+        prepareDialog = new ProgressDialog(getActivity());
+        prepareDialog.setTitle("Searching");
+        prepareDialog.setMessage("Preparing subtitles...");
+        prepareDialog.setCanceledOnTouchOutside(false);
+        prepareDialog.setCancelable(false);
+        prepareDialog.show();
+        YifySubtitles yifySubtitles = new YifySubtitles(new OnSceneListener() {
+            @Override
+            public void onFoundFilm(String query, ArrayList<Film> films) {
+
+            }
+
+            @Override
+            public void onFoundLinkDownload(String poster, String linkDownload, String detail, String preview) {
+
+            }
+
+            @Override
+            public void onFoundListSubtitle(ArrayList<Subtitle> listSubtitle) {
+                getListSubscene(arrayFilms.get(position).getUrl());
+                if (listSubtitle != null)
+                    arrayYify = listSubtitle;
+            }
+        });
+        yifySubtitles.searchSubsFromMovieName("https://www.yifysubtitles.com/movie-imdb/" + arrayFilms.get(position).getUrl(), "");
     }
 
     @Override
@@ -134,7 +183,7 @@ public class SearchHintFragment extends Fragment implements OnItemClickListener,
                     // listFilm.addItemDecoration(new MarginDividerDecoration(mThis));
                     listFilm.setVisibility(View.VISIBLE);
                     adapter = null;
-                    adapter = new HintAdapter(getActivity(), arrayFilms,query);
+                    adapter = new HintAdapter(getActivity(), arrayFilms, query);
                     listFilm.setAdapter(adapter);
                     adapter.setOnItemClickListener(SearchHintFragment.this);
                 }
@@ -143,4 +192,91 @@ public class SearchHintFragment extends Fragment implements OnItemClickListener,
 
     }
 
+    private ArrayList<Film> subsceneFilm = new ArrayList<>();
+    private int filmPos = 0;
+
+    private void getListSubscene(String imdb) {
+        this.imdb = imdb;
+        subscene = new Subscene(this);
+        subscene.getMovieSubsByName(stringQuery, "");
+    }
+
+    @Override
+    public void onFoundFilm(String query, ArrayList<Film> films) {
+        for (Film film : films)
+            if (!film.getType().equals("Popular"))
+                subsceneFilm.add(film);
+        if (subsceneFilm.size() >= 0)
+            subscene.searchSubsFromMovieName(subsceneFilm.get(filmPos).getUrl(), "");
+        else {
+            prepareDialog.dismiss();
+            if (arrayYify.size() > 0) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent intent = new Intent(getActivity(), SubSearchDetailActivity.class);
+                        intent.putExtra("film", arrayFilms.get(position));
+                        intent.putExtra("YifyFilm", arrayYify);
+                        intent.putExtra("SubScene", arraySubscene);
+                        startActivity(intent);
+                        ((MainActivity) getActivity()).exitSearchUi();
+                    }
+                });
+            } else {
+                Intent intent = new Intent(getActivity(), ListSearchResultActivity.class);
+                intent.putExtra("Search", stringQuery);
+                startActivity(intent);
+            }
+        }
+    }
+
+    @Override
+    public void onFoundLinkDownload(String poster, String linkDownload, String detail, String preview) {
+
+    }
+
+    @Override
+    public void onFoundListSubtitle(final ArrayList<Subtitle> listSubtitle) {
+        if (listSubtitle != null && listSubtitle.size() > 0) {
+            if (listSubtitle.get(0).getImdb().equals(imdb)) {
+                arraySubscene = listSubtitle;
+                prepareDialog.dismiss();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent intent = new Intent(getActivity(), SubSearchDetailActivity.class);
+                        intent.putExtra("film", arrayFilms.get(position));
+                        intent.putExtra("YifyFilm", arrayYify);
+                        intent.putExtra("SubScene", arraySubscene);
+                        startActivity(intent);
+                        ((MainActivity) getActivity()).exitSearchUi();
+                    }
+                });
+                return;
+            }
+        }
+        filmPos++;
+        if (filmPos < subsceneFilm.size()) {
+            subscene.searchSubsFromMovieName(subsceneFilm.get(filmPos).getUrl(), "");
+        } else {
+            prepareDialog.dismiss();
+            if (arrayYify.size() > 0) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent intent = new Intent(getActivity(), SubSearchDetailActivity.class);
+                        intent.putExtra("film", arrayFilms.get(position));
+                        intent.putExtra("YifyFilm", arrayYify);
+                        intent.putExtra("SubScene", arraySubscene);
+                        startActivity(intent);
+                        ((MainActivity) getActivity()).exitSearchUi();
+                    }
+                });
+            } else {
+                Intent intent = new Intent(getActivity(), ListSearchResultActivity.class);
+                intent.putExtra("Search", stringQuery);
+                startActivity(intent);
+            }
+        }
+    }
 }

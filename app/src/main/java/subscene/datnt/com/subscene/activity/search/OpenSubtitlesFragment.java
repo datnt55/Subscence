@@ -105,7 +105,7 @@ public class OpenSubtitlesFragment extends Fragment implements OnItemClickListen
             @Override
             public void run() {
                 dialog.setVisibility(View.GONE);
-                if (films.size() == 0) {
+                if (films == null || films.size() == 0) {
                     txtNoFilm.setVisibility(View.VISIBLE);
                     listFilm.setVisibility(View.GONE);
                     arrayFilms.clear();

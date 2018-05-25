@@ -13,6 +13,7 @@ public class Subtitle implements Serializable{
     private String link;
     private String year;
     private String film;
+    private String imdb;
 
     public Subtitle(String title, String languague, String poster,String link, String year) {
         this.title = title;
@@ -74,6 +75,14 @@ public class Subtitle implements Serializable{
 
     public void setFilm(String film) {
         this.film = film;
+    }
+
+    public String getImdb() {
+        return imdb;
+    }
+
+    public void setImdb(String imdb) {
+        this.imdb = imdb;
     }
 
     @Override

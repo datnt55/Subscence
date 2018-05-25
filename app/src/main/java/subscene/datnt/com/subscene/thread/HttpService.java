@@ -59,7 +59,7 @@ public class HttpService {
             JSONArray jsonArray = new JSONArray(jsonData);
             for (int i = 0 ; i < jsonArray.length(); i++){
                 JSONObject json = jsonArray.getJSONObject(i);
-                listHint.add(new Film(ServerType.YIFYSUBTITLE, json.getString("movie"),"https://www.yifysubtitles.com/movie-imdb/"+json.getString("imdb")));
+                listHint.add(new Film(ServerType.YIFYSUBTITLE, "https://www.yifysubtitles.com/movie-imdb/"+json.getString("movie"),json.getString("imdb")));
             }
             // Do something with the response.
         } catch (IOException e) {
@@ -89,7 +89,7 @@ public class HttpService {
             JSONArray jsonArray = data.getJSONArray("Search");
             for (int i = 0 ; i < jsonArray.length(); i++){
                 JSONObject json = jsonArray.getJSONObject(i);
-                listHint.add(new Film(ServerType.OMDBAPI, json.getString("Title"),json.getString("imdbID")));
+                listHint.add(new Film(ServerType.YIFYSUBTITLE, json.getString("Title"),json.getString("imdbID")));
             }
             // Do something with the response.
         } catch (IOException e) {

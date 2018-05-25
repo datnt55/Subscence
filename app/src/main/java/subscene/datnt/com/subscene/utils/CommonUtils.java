@@ -49,6 +49,12 @@ public class CommonUtils {
         }
         return true;
     }
+    // Convert from dpi to pixel
+    public static int convertDpToPx(int dp, Context context) {
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        return px;
+    }
 
     public static String convertCurrency(int currency){
         NumberFormat formatter = NumberFormat.getInstance();

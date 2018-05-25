@@ -86,6 +86,19 @@ public class Subscene extends SubServer{
                 String textYear = yearElement.select("strong").text();
                 String year = yearElement.text().replaceFirst(textYear, "").trim();
 
+                //Get year
+                Element imdbElement = document.select("div.header > h2 > a").first();
+                String imdb = imdbElement.attr("href");
+                imdb = imdb.substring(imdb.lastIndexOf("/")+1);
+                String id = imdb.replace("tt","");
+                if (id.length() < 7){
+                    int offset = 7 - id.length();
+                    String addition = "";
+                    for (int i = 0 ; i < offset; i++)
+                        addition = addition +"0";
+                    imdb = "tt"+addition+id;
+                }
+
                 Elements table = document.select("table > tbody > tr > td");
                 for (Element element : table) {
                     Element links = element.select("a").first();
@@ -100,6 +113,7 @@ public class Subscene extends SubServer{
                             if (contents.get(1) != null)
                                 filmName = contents.get(1).text();
                             Subtitle subtitle = new Subtitle(filmName, lang, poster, "https://subscene.com"+link, year);
+                            subtitle.setImdb(imdb);
                             listSubtitle.add(subtitle);
                         }
 
@@ -111,16 +125,10 @@ public class Subscene extends SubServer{
 
         } catch (HttpStatusException e) {
             e.printStackTrace();
-            if (listener != null)
-                listener.onFoundListSubtitle(listSubtitle);
         } catch (IOException e) {
             e.printStackTrace();
-            if (listener != null)
-                listener.onFoundListSubtitle(listSubtitle);
         } catch (UncheckedIOException e) {
             e.printStackTrace();
-            if (listener != null)
-                listener.onFoundListSubtitle(listSubtitle);
         }
         if (listener != null)
             listener.onFoundListSubtitle(listSubtitle);

@@ -4,12 +4,17 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
+import org.apache.xmlrpc.webserver.ServletWebServer;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.util.ArrayList;
 
 import subscene.datnt.com.subscene.listener.OnSceneListener;
@@ -151,14 +156,42 @@ public class YifySubtitles extends SubServer {
                 if (listener != null)
                     listener.onFoundListSubtitle(listSub);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            if (listener != null)
+                listener.onFoundListSubtitle(null);
         }
 
     }
 
+    public void checkUrlFound(final String url, final CheckHTTPConnectListener listener){
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                innerCheckUrlFound(url, listener);
+            }
+        });
+    }
 
-
+    public boolean innerCheckUrlFound(String url, CheckHTTPConnectListener listener){
+        URL u = null;
+        try {
+            u = new URL( url);
+            HttpURLConnection huc =  (HttpURLConnection)  u.openConnection ();
+            huc.setRequestMethod ("GET");  //OR  huc.setRequestMethod ("HEAD");
+            huc.connect () ;
+            int code = huc.getResponseCode() ;
+            if (listener != null)
+                listener.onConnect(code == HttpURLConnection.HTTP_OK);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
     @Override
     public void release() {
         handler.post(new Runnable() {
@@ -167,5 +200,9 @@ public class YifySubtitles extends SubServer {
                 handler.getLooper().quit();
             }
         });
+    }
+
+    public interface CheckHTTPConnectListener{
+        void onConnect(boolean status);
     }
 }
