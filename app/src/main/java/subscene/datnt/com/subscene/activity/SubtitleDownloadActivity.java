@@ -108,9 +108,9 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
         progressBar = findViewById(R.id.progressBar);
         imgPoster = findViewById(R.id.img_poster);
         options = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.mipmap.ic_launcher)
-                .showImageForEmptyUri(R.mipmap.ic_launcher)
-                .showImageOnFail(R.mipmap.ic_launcher)
+                .showImageOnLoading(R.drawable.loading)
+                .showImageForEmptyUri(R.drawable.no_image)
+                .showImageOnFail(R.drawable.no_image)
                 .cacheInMemory(true)
                 .cacheOnDisk(true)
                 .considerExifParams(true)

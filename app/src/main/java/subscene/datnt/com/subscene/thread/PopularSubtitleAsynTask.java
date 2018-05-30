@@ -40,9 +40,10 @@ import static subscene.datnt.com.subscene.utils.ServerType.SUBSCENE;
 public class PopularSubtitleAsynTask extends AsyncTask<Void, Void, ArrayList<PopularFilm>> {
     private String language;
     private OnSearchPopolarFilmListener listener;
-
-    public PopularSubtitleAsynTask(String language , OnSearchPopolarFilmListener listener) {
+    private String filter;
+    public PopularSubtitleAsynTask(String language ,String filter,  OnSearchPopolarFilmListener listener) {
         this.language = language;
+        this.filter = filter;
         this.listener = listener;
     }
 
@@ -54,7 +55,7 @@ public class PopularSubtitleAsynTask extends AsyncTask<Void, Void, ArrayList<Pop
     protected ArrayList<PopularFilm> doInBackground(Void... strings) {
             URL url = null;
             try {
-                url = new URL("https://subscene.com/browse/popular/series/1");
+                url = new URL("https://subscene.com/browse/popular/"+filter+"/1");
                 URLConnection conn = url.openConnection();
                 conn.setRequestProperty("Cookie", "LanguageFilter="+language);
                 // Send the request to the server
@@ -90,7 +91,8 @@ public class PopularSubtitleAsynTask extends AsyncTask<Void, Void, ArrayList<Pop
                                 download = td.text();
                             }
                         }
-                        popularFilms.add(new PopularFilm(SUBSCENE, name, link, date, download));
+                        if (!name.equals(""))
+                            popularFilms.add(new PopularFilm(SUBSCENE, name, link, date, download));
                     }
                     return popularFilms;
                 }

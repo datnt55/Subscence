@@ -1,5 +1,5 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name">SubScene</string>
+    <string name="app_name">Subtitles Downloader</string>
     <string name="film_year"><![CDATA[<b>Year: </b> %1$s]]></string>
 
     <!-- TODO: Remove or change this placeholder text -->
@@ -12,4 +12,6 @@
             <xliff:g id="title">%1$s</xliff:g>. <xliff:g id="count">%2$d</xliff:g> unread items.
         </item>
     </plurals>
+    <string name="splash_content">Subtitles Downloader \n Seach and Download Subtitles for Your favourite</string>
+
 </resources>

@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements DownloadedFragmen
         autoDownloadFragment = new AutoDownloadFragment();
         downloadedFragment = new DownloadedFragment();
 
-        adapter.addFrag(popularFragment, "Popular Subtitle");
+        adapter.addFrag(popularFragment, "Popular Subtitles");
         adapter.addFrag(autoDownloadFragment, "Auto Download");
         adapter.addFrag(downloadedFragment, "Downloaded");
         viewPager.setAdapter(adapter);
@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements DownloadedFragmen
 //        viewPager.setOffscreenPageLimit(limit);
     }
     private void setupTabIcons() {
-        tabLayout.getTabAt(0).setText("Popular Subs");
+        tabLayout.getTabAt(0).setText("Popular Subtitles");
         tabLayout.getTabAt(1).setText("Auto Download");
         tabLayout.getTabAt(2).setText("Downloaded");
 //        tabLayout.getTabAt(0).getIcon().setColorFilter(ContextCompat.getColor(mThis, R.color.blue_light), PorterDuff.Mode.SRC_IN);

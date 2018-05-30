@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:id="@+id/root"
     tools:context="subscene.datnt.com.subscene.activity.PopularFragment">
-    <FrameLayout
+    <RelativeLayout
         android:id="@+id/layout_language"
         android:layout_width="match_parent"
         android:layout_height="45dp"
@@ -18,15 +18,24 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:text="Your Language" />
+            android:text="Filter Language" />
 
         <Spinner
             android:id="@+id/spr_language"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/textView"
             android:layout_gravity="right|center_vertical"/>
-
-    </FrameLayout>
+        <Spinner
+            android:id="@+id/spr_filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="right|center_vertical"/>
+    </RelativeLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list_popular_film"

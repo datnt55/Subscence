@@ -76,9 +76,9 @@ public class SubSearchDetailActivity extends AppCompatActivity implements OnItem
         arraySubscene = (ArrayList<Subtitle>) getIntent().getSerializableExtra("SubScene");
         arrayYify = (ArrayList<Subtitle>) getIntent().getSerializableExtra("YifyFilm");
         options = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.mipmap.ic_launcher)
-                .showImageForEmptyUri(R.mipmap.ic_launcher)
-                .showImageOnFail(R.mipmap.ic_launcher)
+                .showImageOnLoading(R.drawable.loading)
+                .showImageForEmptyUri(R.drawable.no_image)
+                .showImageOnFail(R.drawable.no_image)
                 .cacheInMemory(true)
                 .cacheOnDisk(true)
                 .considerExifParams(true)

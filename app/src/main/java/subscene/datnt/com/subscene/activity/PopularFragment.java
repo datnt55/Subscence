@@ -41,8 +41,10 @@ public class PopularFragment extends Fragment implements PopularSubtitleAsynTask
     private RelativeLayout root;
     private ArrayList<PopularFilm> listPopularFilm = new ArrayList<>();
     private Spinner spnLanguage;
+    private Spinner spnFilter;
     private ArrayList<Language> languages = new ArrayList<>();
     private Language ownLanguage;
+    private String currentFilter = "all";
 
     public PopularFragment() {
         // Required empty public constructor
@@ -66,6 +68,7 @@ public class PopularFragment extends Fragment implements PopularSubtitleAsynTask
         listFilm.setLayoutManager(mLayoutManager);
         progressBar.setVisibility(View.VISIBLE);
         spnLanguage = v.findViewById(R.id.spr_language);
+        spnFilter = v.findViewById(R.id.spr_filter);
         ownLanguage = new SharePreference(getActivity()).getCurrentLanguage();
 
         SharePreference preference = new SharePreference(getActivity());
@@ -76,9 +79,48 @@ public class PopularFragment extends Fragment implements PopularSubtitleAsynTask
                 return s1.getName().compareToIgnoreCase(s2.getName());
             }
         });
+
+        ArrayList<String> arrayFilter = new ArrayList<>();
+        arrayFilter.add("All");
+        arrayFilter.add("Movies");
+        arrayFilter.add("TV-Series");
+        arrayFilter.add("Music Videos");
+        ArrayAdapter adapter = new ArrayAdapter(getActivity(), android.R.layout.simple_spinner_item, arrayFilter);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spnFilter.setAdapter(adapter);
+        spnFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                progressBar.setVisibility(View.VISIBLE);
+                listFilm.setVisibility(View.GONE);
+
+                switch (position){
+                    case 0:
+                        currentFilter = "all";
+                        break;
+                    case 1:
+                        currentFilter = "film";
+                        break;
+                    case 2:
+                        currentFilter = "series";
+                        break;
+                    case 3:
+                        currentFilter = "music";
+                        break;
+                }
+                new PopularSubtitleAsynTask(ownLanguage.getId(),currentFilter,PopularFragment.this).execute();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         ArrayList<String> languageName = new ArrayList<>();
         for (Language language : languages)
             languageName.add(language.getName());
+
         spnLanguage.setOnItemSelectedListener(PopularFragment.this);
         ArrayAdapter aa = new ArrayAdapter(getActivity(), android.R.layout.simple_spinner_item, languageName);
         aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -116,7 +158,7 @@ public class PopularFragment extends Fragment implements PopularSubtitleAsynTask
                         @Override
                         public void onClick(View view) {
                             progressBar.setVisibility(View.VISIBLE);
-                            new PopularSubtitleAsynTask("",PopularFragment.this).execute();
+                            new PopularSubtitleAsynTask(ownLanguage.getId(),currentFilter,PopularFragment.this).execute();
                         }
                     });
 
@@ -142,7 +184,7 @@ public class PopularFragment extends Fragment implements PopularSubtitleAsynTask
         new SharePreference(getActivity()).saveCurrentLanguage(ownLanguage);
         progressBar.setVisibility(View.VISIBLE);
         listFilm.setVisibility(View.GONE);
-        new PopularSubtitleAsynTask(ownLanguage.getId(),this).execute();
+        new PopularSubtitleAsynTask(ownLanguage.getId(),currentFilter, this).execute();
     }
 
     @Override

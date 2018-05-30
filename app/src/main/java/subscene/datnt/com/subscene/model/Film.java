@@ -13,6 +13,7 @@ public class Film implements Serializable{
     protected String url;
     protected String subCount;
     protected String type;
+    protected String poster;
     protected ServerType server;
     public Film() {
     }
@@ -67,5 +68,13 @@ public class Film implements Serializable{
 
     public void setServer(ServerType server) {
         this.server = server;
+    }
+
+    public String getPoster() {
+        return poster;
+    }
+
+    public void setPoster(String poster) {
+        this.poster = poster;
     }
 }

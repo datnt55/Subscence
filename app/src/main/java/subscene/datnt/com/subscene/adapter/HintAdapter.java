@@ -5,6 +5,7 @@ package subscene.datnt.com.subscene.adapter;
  */
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableString;
@@ -18,6 +19,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 import java.util.ArrayList;
 
@@ -37,11 +42,21 @@ public class HintAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final ArrayList<Film> mListHint;
     private String query;
     private OnItemClickListener listener;
+    private DisplayImageOptions options;
 
     public HintAdapter(Context mContext, ArrayList<Film> mListFile, String query) {
         this.mContext = mContext;
         this.mListHint = mListFile;
         this.query = query;
+        options = new DisplayImageOptions.Builder()
+                .showImageOnLoading(R.drawable.loading)
+                .showImageForEmptyUri(R.drawable.no_image)
+                .showImageOnFail(R.drawable.no_image)
+                .cacheInMemory(true)
+                .cacheOnDisk(true)
+                .considerExifParams(true)
+                .bitmapConfig(Bitmap.Config.RGB_565)
+                .build();
     }
 
     public void setOnItemClickListener(OnItemClickListener listener){
@@ -59,6 +74,7 @@ public class HintAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final HintViewHolder mHolder = (HintViewHolder) holder;
         mHolder.txtMovie.setText(mListHint.get(position).getName());
+        ImageLoader.getInstance().displayImage(mListHint.get(position).getPoster(), mHolder.imgPoster, options, new SimpleImageLoadingListener());
         //highlightText( mHolder.txtMovie, query);
         mHolder.root.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,9 +109,11 @@ public class HintAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private final TextView txtMovie;
         private final RelativeLayout root;
+        private ImageView imgPoster;
         HintViewHolder(View itemView) {
             super(itemView);
             txtMovie = (TextView) itemView.findViewById(R.id.txt_movie);
+            imgPoster = itemView.findViewById(R.id.img_poster);
             root =  itemView.findViewById(R.id.root);
         }
     }

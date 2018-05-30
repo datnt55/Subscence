@@ -33,6 +33,7 @@ import subscene.datnt.com.subscene.listener.OnItemClickListener;
 import subscene.datnt.com.subscene.R;
 import subscene.datnt.com.subscene.listener.OnSceneListener;
 import subscene.datnt.com.subscene.model.Film;
+import subscene.datnt.com.subscene.model.FilmInfo;
 import subscene.datnt.com.subscene.model.MovieHint;
 import subscene.datnt.com.subscene.model.Subtitle;
 import subscene.datnt.com.subscene.thread.HttpService;
@@ -189,6 +190,11 @@ public class SearchHintFragment extends Fragment implements OnItemClickListener,
                 }
             }
         });
+
+    }
+
+    @Override
+    public void onGetFilmInfo(FilmInfo filmInfo) {
 
     }
 
