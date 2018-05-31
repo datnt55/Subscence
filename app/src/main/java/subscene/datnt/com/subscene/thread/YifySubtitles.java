@@ -67,7 +67,7 @@ public class YifySubtitles extends SubServer {
                 Element result = document.select("div.col-xs-12> a.btn-icon.download-subtitle").first();
                 String download = result.attr("href");
                 if (listener != null)
-                    listener.onFoundLinkDownload("",download,"","");
+                    listener.onFoundLinkDownload("","",download,"","");
             }
         } catch (IOException e) {
             e.printStackTrace();

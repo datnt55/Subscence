@@ -41,78 +41,200 @@
                 <ImageView
                     android:id="@+id/img_poster"
                     android:layout_width="150dp"
+                    android:src="@drawable/ab_gradient"
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true" />
 
-                <TextView
-                    android:id="@+id/txt_year"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:id="@+id/layout_info"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
+                    android:visibility="gone"
                     android:layout_toRightOf="@+id/img_poster"
-                    android:text=""
-                    android:textColor="#000" />
-
-                <RelativeLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/txt_year"
-                    android:layout_marginLeft="10dp"
-                    android:layout_toRightOf="@+id/img_poster">
-
-                    <LinearLayout
-                        android:id="@+id/layout_source"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/textView4"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginRight="5dp"
-                            android:layout_weight="1.5"
-                            android:text="Source"
-                            android:textColor="#000"
-                            android:textStyle="bold" />
-
-                        <Spinner
-                            android:id="@+id/spinner_source"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_toRightOf="@+id/textView4"
-                            android:layout_weight="2"
-                            android:gravity="left" />
-                    </LinearLayout>
-
+                    android:orientation="vertical">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_below="@+id/layout_source"
-                        android:orientation="horizontal">
 
+                        android:orientation="vertical">
                         <TextView
-                            android:id="@+id/textView5"
-                            android:layout_width="0dp"
-                            android:layout_weight="1.5"
+                            android:id="@+id/txt_genre"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginRight="5dp"
-                            android:text="Language"
-                            android:textColor="#000"
-                            android:textStyle="bold" />
+                            android:text="Adventure"
+                            android:layout_marginBottom="5dp"
+                            android:textStyle="bold"
+                            android:textSize="18sp"
+                            android:textColor="#000" />
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:orientation="horizontal">
 
-                        <Spinner
-                            android:id="@+id/spinner"
-                            android:layout_width="0dp"
-                            android:layout_weight="2"
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Rating"
+                                android:gravity="bottom"
+                                android:drawablePadding="5dp"
+                                android:drawableLeft="@drawable/ic_star_black_24dp"
+                                android:textColor="#000"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/txt_rating"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="TextView"
+                                android:textColor="#000" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_toRightOf="@+id/textView5" />
+                            android:layout_marginBottom="5dp"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/textView7"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Runtime"
+                                android:gravity="bottom"
+                                android:drawablePadding="5dp"
+                                android:drawableLeft="@drawable/ic_query_builder_black_24dp"
+                                android:textColor="#000"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/txt_runtime"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textColor="#000"
+                                android:text="Runtime" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:layout_gravity="bottom"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:drawableLeft="@drawable/ic_language_black_24dp"
+                                android:text="Country"
+                                android:gravity="bottom"
+                                android:drawablePadding="5dp"
+                                android:textColor="#000"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/txt_country"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textColor="#000"
+                                android:text="Runtime" />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:layout_gravity="bottom"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:drawableLeft="@drawable/ic_new_releases_black_24dp"
+                                android:text="Released"
+                                android:gravity="bottom"
+                                android:drawablePadding="5dp"
+                                android:textColor="#000"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/txt_year"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textColor="#000" />
+                        </LinearLayout>
                     </LinearLayout>
-                </RelativeLayout>
+
+
+                </LinearLayout>
             </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/txt_year"
+                android:layout_marginLeft="10dp"
+                android:layout_toRightOf="@+id/img_poster">
 
+                <LinearLayout
+                    android:id="@+id/layout_source"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="5dp"
+                        android:layout_weight="1.5"
+                        android:text="Source"
+                        android:textColor="#000"
+                        android:textStyle="bold" />
+
+                    <Spinner
+                        android:id="@+id/spinner_source"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@+id/textView4"
+                        android:layout_weight="2"
+                        android:gravity="left" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/layout_source"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/textView5"
+                        android:layout_width="0dp"
+                        android:layout_weight="1.5"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="5dp"
+                        android:text="Language"
+                        android:textColor="#000"
+                        android:textStyle="bold" />
+
+                    <Spinner
+                        android:id="@+id/spinner"
+                        android:layout_width="0dp"
+                        android:layout_weight="2"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@+id/textView5" />
+                </LinearLayout>
+            </RelativeLayout>
             <TextView
                 android:id="@+id/txt_title"
                 android:layout_width="match_parent"

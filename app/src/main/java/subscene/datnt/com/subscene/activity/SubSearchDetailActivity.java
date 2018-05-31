@@ -4,10 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,6 +18,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -33,24 +32,20 @@ import java.util.ArrayList;
 import subscene.datnt.com.subscene.R;
 import subscene.datnt.com.subscene.adapter.SubtitleAdapter;
 import subscene.datnt.com.subscene.listener.OnItemClickListener;
-import subscene.datnt.com.subscene.listener.OnSceneListener;
 import subscene.datnt.com.subscene.model.Film;
+import subscene.datnt.com.subscene.model.FilmInfo;
 import subscene.datnt.com.subscene.model.Language;
 import subscene.datnt.com.subscene.model.Subtitle;
-import subscene.datnt.com.subscene.thread.SubServer;
-import subscene.datnt.com.subscene.thread.Subscene;
-import subscene.datnt.com.subscene.thread.YifySubtitles;
-import subscene.datnt.com.subscene.utils.ServerType;
+import subscene.datnt.com.subscene.thread.HttpService;
 import subscene.datnt.com.subscene.utils.SharePreference;
 import subscene.datnt.com.subscene.widget.DividerItemDecoration;
 
-public class SubSearchDetailActivity extends AppCompatActivity implements OnItemClickListener, AdapterView.OnItemSelectedListener {
+public class SubSearchDetailActivity extends AppCompatActivity implements OnItemClickListener, AdapterView.OnItemSelectedListener, HttpService.HttpResponseListener {
     private Film film;
     private DisplayImageOptions options;
     private ImageView imgPoster;
     private RecyclerView listSubtitle;
     private Context mThis;
-    private TextView txtYear;
     private Toolbar toolbar;
     private TextView txtTitle;
     private ProgressBar progressBar;
@@ -66,12 +61,15 @@ public class SubSearchDetailActivity extends AppCompatActivity implements OnItem
     private ArrayList<String> arraySource = new ArrayList<>();
     private String currentLang;
     private String currentSource;
+    private HttpService httpService;
+    private String imdb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_sub_detail);
         mThis = this;
+        imdb =  getIntent().getStringExtra("imdb");
         film = (Film) getIntent().getSerializableExtra("film");
         arraySubscene = (ArrayList<Subtitle>) getIntent().getSerializableExtra("SubScene");
         arrayYify = (ArrayList<Subtitle>) getIntent().getSerializableExtra("YifyFilm");
@@ -85,14 +83,15 @@ public class SubSearchDetailActivity extends AppCompatActivity implements OnItem
                 .bitmapConfig(Bitmap.Config.RGB_565)
                 .build();
         imgPoster = findViewById(R.id.img_poster);
-        txtYear = findViewById(R.id.txt_year);
         listSubtitle = findViewById(R.id.list_sub);
+        listSubtitle.setFocusable(false);
         progressBar = findViewById(R.id.progressBar);
         toolbar = findViewById(R.id.toolbar);
         txtNoSub = findViewById(R.id.txt_no_sub);
         spnLanguage = findViewById(R.id.spinner);
         spnSource = findViewById(R.id.spinner_source);
         layoutContent = findViewById(R.id.content);
+        httpService = new HttpService("SubSearchDetailActivity", this);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(film.getName());
@@ -107,7 +106,7 @@ public class SubSearchDetailActivity extends AppCompatActivity implements OnItem
         listSubtitle.setHasFixedSize(true);
         listSubtitle.setNestedScrollingEnabled(false);
         txtTitle = findViewById(R.id.txt_title);
-
+        httpService.getFilmInformation(imdb);
         arraySource.add("Subscene");
         arraySource.add("Yifysubtitles");
         currentSource = "Subscene";
@@ -117,30 +116,10 @@ public class SubSearchDetailActivity extends AppCompatActivity implements OnItem
         else
             ImageLoader.getInstance().displayImage(arrayYify.get(0).getPoster(), imgPoster, options, new SimpleImageLoadingListener());
 
-        new LoadSubAsynTask().execute();
-    }
-
-    private class LoadSubAsynTask extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressBar.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            progressBar.setVisibility(View.GONE);
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            if (arraySubscene.size() > 0)
-                updateView(arraySubscene);
-            else
-                updateView(arrayYify);
-            return null;
-        }
+        if (arraySubscene.size() > 0)
+            updateView(arraySubscene);
+        else
+            updateView(arrayYify);
     }
 
     private int getLayoutManagerOrientation(int activityOrientation) {
@@ -156,6 +135,7 @@ public class SubSearchDetailActivity extends AppCompatActivity implements OnItem
         Intent intent = new Intent(mThis, SubtitleDownloadActivity.class);
         intent.putExtra("Subtitle", arraySubtitleFilter.get(position));
         intent.putExtra("Film", film);
+        intent.putExtra("imdb", imdb);
         startActivity(intent);
     }
 
@@ -186,7 +166,6 @@ public class SubSearchDetailActivity extends AppCompatActivity implements OnItem
         ImageLoader.getInstance().displayImage(subtitles.get(0).getPoster(), imgPoster, options, new SimpleImageLoadingListener());
         adapter = new SubtitleAdapter(mThis, arraySubtitleFilter);
         listSubtitle.setAdapter(adapter);
-        txtYear.setText(getSpannedText(mThis.getResources().getString(R.string.film_year, subtitles.get(0).getYear())));
         adapter.setOnItemClickListener(SubSearchDetailActivity.this);
         txtTitle.setText("Subtitles for " + film.getName());
         ArrayList<Language> languageArrayList = new SharePreference(this).getLanguage();
@@ -283,5 +262,33 @@ public class SubSearchDetailActivity extends AppCompatActivity implements OnItem
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
 
+    }
+
+    @Override
+    public void onGetHint(String query, ArrayList<Film> listHint) {
+
+    }
+
+    @Override
+    public void onGetFilmInfo(final FilmInfo filmInfo) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                LinearLayout layoutInfo = findViewById(R.id.layout_info);
+                TextView txtGenre = findViewById(R.id.txt_genre);
+                TextView txtRating = findViewById(R.id.txt_rating);
+                TextView txtRuntime = findViewById(R.id.txt_runtime);
+                TextView txtCountry = findViewById(R.id.txt_country);
+                TextView txtYear = findViewById(R.id.txt_year);
+                if (filmInfo != null){
+                    layoutInfo.setVisibility(View.VISIBLE);
+                    txtGenre.setText(filmInfo.getGenre());
+                    txtRating.setText(filmInfo.getRating()+ " ★");
+                    txtRuntime.setText(filmInfo.getRunTime());
+                    txtCountry.setText(filmInfo.getCountry());
+                    txtYear.setText(filmInfo.getReleased());
+                }
+            }
+        });
     }
 }

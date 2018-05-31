@@ -41,6 +41,7 @@
         android:id="@+id/list_popular_film"
         android:layout_below="@+id/layout_language"
         android:layout_width="match_parent"
+        android:visibility="gone"
         android:layout_height="match_parent" />
 
     <ProgressBar

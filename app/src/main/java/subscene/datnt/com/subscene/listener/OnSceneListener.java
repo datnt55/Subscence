@@ -11,6 +11,6 @@ import subscene.datnt.com.subscene.model.Subtitle;
 
 public interface OnSceneListener {
     void onFoundFilm(String query, ArrayList<Film> films);
-    void onFoundLinkDownload(String poster, String linkDownload, String detail, String preview);
+    void onFoundLinkDownload(String poster,String imdb, String linkDownload, String detail, String preview);
     void onFoundListSubtitle(ArrayList<Subtitle> listSubtitle);
 }

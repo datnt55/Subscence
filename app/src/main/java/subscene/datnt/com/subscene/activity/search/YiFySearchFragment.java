@@ -111,7 +111,7 @@ public class YiFySearchFragment extends Fragment implements OnItemClickListener,
     }
 
     @Override
-    public void onFoundLinkDownload(String poster, String linkDownload, String detail, String preview) {
+    public void onFoundLinkDownload(String poster,String imdb, String linkDownload, String detail, String preview) {
 
     }
 

@@ -54,10 +54,12 @@ import co.ceryle.segmentedbutton.SegmentedButtonGroup;
 import subscene.datnt.com.subscene.listener.OnSceneListener;
 import subscene.datnt.com.subscene.model.Film;
 import subscene.datnt.com.subscene.R;
+import subscene.datnt.com.subscene.model.FilmInfo;
 import subscene.datnt.com.subscene.model.PopularFilm;
 import subscene.datnt.com.subscene.model.Subtitle;
 import subscene.datnt.com.subscene.model.SubtitleDetail;
 import subscene.datnt.com.subscene.model.YiFyFilm;
+import subscene.datnt.com.subscene.thread.HttpService;
 import subscene.datnt.com.subscene.thread.OpenSubtitle;
 import subscene.datnt.com.subscene.thread.SubServer;
 import subscene.datnt.com.subscene.thread.Subscene;
@@ -69,7 +71,7 @@ import subscene.datnt.com.subscene.widget.FilePickerBottomSheet;
 
 import static subscene.datnt.com.subscene.utils.Globals.APP_FOLDER;
 
-public class SubtitleDownloadActivity extends AppCompatActivity implements FilePickerBottomSheet.FilePickerListener,OnSceneListener {
+public class SubtitleDownloadActivity extends AppCompatActivity implements FilePickerBottomSheet.FilePickerListener,OnSceneListener, HttpService.HttpResponseListener {
     private Subtitle subtitle;
     private Film film;
     private PopularFilm popularFilm;
@@ -92,6 +94,7 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
     private ScrollView scrollView;
     private SubServer subscene;
     private TextView txtDescription;
+    private String imdb;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,6 +106,14 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
             subtitle = (Subtitle) getIntent().getSerializableExtra("Subtitle");
             film = (Film) getIntent().getSerializableExtra("Film");
         }
+        if (getIntent().hasExtra("imdb")){
+            imdb = getIntent().getStringExtra("imdb");
+            if (!imdb.equals("")){
+                HttpService httpService = new HttpService("SubtitleDownloadActivity", SubtitleDownloadActivity.this);
+                httpService.getFilmInformation(imdb);
+            }
+        }
+
         layoutContent = findViewById(R.id.layout_content);
         txtDescription = findViewById(R.id.txt_filmname);
         progressBar = findViewById(R.id.progressBar);
@@ -287,13 +298,18 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
     }
 
     @Override
-    public void onFoundLinkDownload(final String poster, final String linkDownload, final String detail, final String url) {
+    public void onFoundLinkDownload(final String poster, final String dbimdb, final String linkDownload, final String detail, final String url) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 updateView(poster, linkDownload, detail, url);
+                if (imdb == null) {
+                    HttpService httpService = new HttpService("SubtitleDownloadActivity", SubtitleDownloadActivity.this);
+                    httpService.getFilmInformation(dbimdb);
+                }
             }
         });
+
     }
 
     @Override
@@ -303,6 +319,35 @@ public class SubtitleDownloadActivity extends AppCompatActivity implements FileP
 
     public void DownloadSubtitle(View view) {
         new DownloadFileFromURL().execute(linkDownload);
+    }
+
+    @Override
+    public void onGetHint(String query, ArrayList<Film> listHint) {
+
+    }
+
+    @Override
+    public void onGetFilmInfo(final FilmInfo filmInfo) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                LinearLayout layoutInfo = findViewById(R.id.layout_info);
+                TextView txtGenre = findViewById(R.id.txt_genre);
+                TextView txtRating = findViewById(R.id.txt_rating);
+                TextView txtRuntime = findViewById(R.id.txt_runtime);
+                TextView txtCountry = findViewById(R.id.txt_country);
+                TextView txtYear = findViewById(R.id.txt_year);
+                if (filmInfo != null){
+                    layoutInfo.setVisibility(View.VISIBLE);
+                    txtGenre.setText(filmInfo.getGenre());
+                    txtRating.setText(filmInfo.getRating()+ " ★");
+                    txtRuntime.setText(filmInfo.getRunTime());
+                    txtCountry.setText(filmInfo.getCountry());
+                    txtYear.setText(filmInfo.getReleased());
+                }
+            }
+        });
+
     }
 
     public class DownloadFileFromURL extends AsyncTask<String, Integer, String> {

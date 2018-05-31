@@ -45,6 +45,7 @@ public class PopularFragment extends Fragment implements PopularSubtitleAsynTask
     private ArrayList<Language> languages = new ArrayList<>();
     private Language ownLanguage;
     private String currentFilter = "all";
+    private boolean firstSelect = true;
 
     public PopularFragment() {
         // Required empty public constructor
@@ -66,7 +67,6 @@ public class PopularFragment extends Fragment implements PopularSubtitleAsynTask
         listFilm.setHasFixedSize(true);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         listFilm.setLayoutManager(mLayoutManager);
-        progressBar.setVisibility(View.VISIBLE);
         spnLanguage = v.findViewById(R.id.spr_language);
         spnFilter = v.findViewById(R.id.spr_filter);
         ownLanguage = new SharePreference(getActivity()).getCurrentLanguage();
@@ -91,9 +91,12 @@ public class PopularFragment extends Fragment implements PopularSubtitleAsynTask
         spnFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (firstSelect){
+                    firstSelect = false;
+                    return;
+                }
                 progressBar.setVisibility(View.VISIBLE);
                 listFilm.setVisibility(View.GONE);
-
                 switch (position){
                     case 0:
                         currentFilter = "all";
@@ -152,17 +155,6 @@ public class PopularFragment extends Fragment implements PopularSubtitleAsynTask
         progressBar.setVisibility(View.GONE);
         listFilm.setVisibility(View.VISIBLE);
         if (link == null){
-            Snackbar snackbar = Snackbar
-                    .make(root, "Oops, Fetching data failure ", Snackbar.LENGTH_LONG)
-                    .setAction("Try again", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            progressBar.setVisibility(View.VISIBLE);
-                            new PopularSubtitleAsynTask(ownLanguage.getId(),currentFilter,PopularFragment.this).execute();
-                        }
-                    });
-
-            snackbar.show();
             return;
         }
         listPopularFilm = link;

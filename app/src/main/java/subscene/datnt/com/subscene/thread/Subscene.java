@@ -175,6 +175,7 @@ public class Subscene extends SubServer{
         String linkDownload = "";
         String detail = "";
         String preview = "";
+        String imdb="";
         ArrayList<SubtitleDetail> subDetails = new ArrayList<>();
         try {
             document = (Document) Jsoup.connect(url).get();
@@ -185,6 +186,18 @@ public class Subscene extends SubServer{
                 //Get link download
                 Elements download = document.select("div.download");
                 linkDownload = "https://subscene.com"+ download.select("a").attr("href");
+                // Get imdb
+                Element imdbElement = document.select("div.header > h1 > a").first();
+                imdb = imdbElement.attr("href");
+                imdb = imdb.substring(imdb.lastIndexOf("/")+1);
+                String id = imdb.replace("tt","");
+                if (id.length() < 7){
+                    int offset = 7 - id.length();
+                    String addition = "";
+                    for (int i = 0 ; i < offset; i++)
+                        addition = addition +"0";
+                    imdb = "tt"+addition+id;
+                }
                 //Get detail
                 Elements windows = document.select("div.details > div.window");
                 if (windows.size() > 0) {
@@ -207,7 +220,7 @@ public class Subscene extends SubServer{
             e.printStackTrace();
         }
         if (listener != null)
-            listener.onFoundLinkDownload(poster, linkDownload,detail,preview);
+            listener.onFoundLinkDownload(poster,imdb, linkDownload,detail,preview);
     }
 
     @Override

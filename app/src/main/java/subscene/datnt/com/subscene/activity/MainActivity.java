@@ -72,8 +72,6 @@ public class MainActivity extends AppCompatActivity implements DownloadedFragmen
         initSearchLayout();
         initViewPager();
         initBottomSheet();
-        YifySubtitles yifySubtitles = new YifySubtitles(null);
-        yifySubtitles.getMovieSubsByName("avenger","");
     }
 
     private void initBottomSheet() {

@@ -150,7 +150,7 @@ public class SearchHintFragment extends Fragment implements OnItemClickListener,
             }
 
             @Override
-            public void onFoundLinkDownload(String poster, String linkDownload, String detail, String preview) {
+            public void onFoundLinkDownload(String poster,String imdb, String linkDownload, String detail, String preview) {
 
             }
 
@@ -224,6 +224,7 @@ public class SearchHintFragment extends Fragment implements OnItemClickListener,
                         intent.putExtra("film", arrayFilms.get(position));
                         intent.putExtra("YifyFilm", arrayYify);
                         intent.putExtra("SubScene", arraySubscene);
+                        intent.putExtra("imdb", imdb);
                         startActivity(intent);
                         ((MainActivity) getActivity()).exitSearchUi();
                     }
@@ -237,7 +238,7 @@ public class SearchHintFragment extends Fragment implements OnItemClickListener,
     }
 
     @Override
-    public void onFoundLinkDownload(String poster, String linkDownload, String detail, String preview) {
+    public void onFoundLinkDownload(String poster,String imdb, String linkDownload, String detail, String preview) {
 
     }
 
@@ -254,6 +255,7 @@ public class SearchHintFragment extends Fragment implements OnItemClickListener,
                         intent.putExtra("film", arrayFilms.get(position));
                         intent.putExtra("YifyFilm", arrayYify);
                         intent.putExtra("SubScene", arraySubscene);
+                        intent.putExtra("imdb", imdb);
                         startActivity(intent);
                         ((MainActivity) getActivity()).exitSearchUi();
                     }
@@ -274,6 +276,7 @@ public class SearchHintFragment extends Fragment implements OnItemClickListener,
                         intent.putExtra("film", arrayFilms.get(position));
                         intent.putExtra("YifyFilm", arrayYify);
                         intent.putExtra("SubScene", arraySubscene);
+                        intent.putExtra("imdb", imdb);
                         startActivity(intent);
                         ((MainActivity) getActivity()).exitSearchUi();
                     }

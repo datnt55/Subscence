@@ -66,6 +66,8 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
     private ArrayList<Subtitle> arraySubtitleFilter = new ArrayList<>();
     private SubtitleAdapter adapter;
     private HttpService httpService;
+    private String currentLang;
+    private String imdb = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,11 +86,13 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
                 .build();
         imgPoster = findViewById(R.id.img_poster);
         listSubtitle = findViewById(R.id.list_sub);
+        listSubtitle.setFocusable(false);
         progressBar = findViewById(R.id.progressBar);
         toolbar = findViewById(R.id.toolbar);
         txtNoSub = findViewById(R.id.txt_no_sub);
         spnLanguage = findViewById(R.id.spinner);
         layoutContent = findViewById(R.id.content);
+        currentLang = new SharePreference(this).getCurrentLanguage().getName();
         httpService = new HttpService("SubDetailActivity", this);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -109,7 +113,7 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
         else if (film.getServer() == ServerType.YIFYSUBTITLE) {
             subscene = new YifySubtitles(this);
             String[] list = film.getUrl().split("/");
-            String imdb = list[list.length-1];
+            imdb = list[list.length-1];
             httpService.getFilmInformation(imdb);
         }
         else if (film.getServer() == ServerType.OPENSUBTITLE) {
@@ -138,6 +142,7 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
     public void onItemClick(int position) {
         Intent intent = new Intent(mThis, SubtitleDownloadActivity.class);
         intent.putExtra("Subtitle", arraySubtitleFilter.get(position));
+        intent.putExtra("imdb", imdb);
         intent.putExtra("Film", film);
         startActivity(intent);
         if (subscene != null)
@@ -150,14 +155,18 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
     }
 
     @Override
-    public void onFoundLinkDownload(String poster, String linkDownload, String detail, String url) {
+    public void onFoundLinkDownload(String poster,String imdb, String linkDownload, String detail, String url) {
 
     }
 
     @Override
     public void onFoundListSubtitle(final ArrayList<Subtitle> subtitles) {
-        if (subtitles.size() > 0 )
-            httpService.getFilmInformation(subtitles.get(0).getImdb());
+        if (subtitles.size() > 0 ) {
+            if (film.getServer() == ServerType.SUBSCENE) {
+                imdb = subtitles.get(0).getImdb();
+                httpService.getFilmInformation(subtitles.get(0).getImdb());
+            }
+        }
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -187,7 +196,8 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
         layoutContent.setVisibility(View.VISIBLE);
         arraySubtitle = subtitles;
         for (Subtitle subtitle : arraySubtitle)
-            arraySubtitleFilter.add(subtitle);
+            if (subtitle.getLanguague().toLowerCase().equals(currentLang.toLowerCase()))
+                arraySubtitleFilter.add(subtitle);
         arraySubtitleFilter.add(0, new Subtitle("Release Name/Film title","Language","","",""));
         ImageLoader.getInstance().displayImage(subtitles.get(0).getPoster(),imgPoster, options, new SimpleImageLoadingListener());
         adapter = new SubtitleAdapter(mThis, arraySubtitleFilter);
@@ -202,6 +212,9 @@ public class SubDetailActivity extends AppCompatActivity implements OnItemClickL
         ArrayAdapter aa = new ArrayAdapter(this,android.R.layout.simple_spinner_item,languages);
         aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spnLanguage.setAdapter(aa);
+        for (int i = 0 ; i < languages.size(); i++)
+            if (languages.get(i).toLowerCase().equals(currentLang.toLowerCase()))
+                spnLanguage.setSelection(i);
 
     }
 
